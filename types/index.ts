@@ -1,5 +1,8 @@
 export type Gender = 'Male' | 'Female';
 
+// 导出时辰类型（从 shi-chen.ts 重新导出）
+export type { ShiChenName } from '@/lib/constants/shi-chen';
+
 export interface UserInput {
   name?: string;
   gender: Gender;
@@ -9,7 +12,6 @@ export interface UserInput {
   dayPillar: string;   // 日柱
   hourPillar: string;  // 时柱
   startAge: string;    // 起运年龄 (虚岁)
-  firstDaYun: string;  // 第一步大运干支
 }
 
 export interface KLinePoint {

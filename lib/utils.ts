@@ -52,7 +52,6 @@ export function generateUserPrompt(userInput: UserInput): string {
 - 出生年份: ${userInput.birthYear}
 - 四柱: ${userInput.yearPillar}年 ${userInput.monthPillar}月 ${userInput.dayPillar}日 ${userInput.hourPillar}时
 - 起运年龄: ${userInput.startAge}岁（虚岁）
-- 第一步大运: ${userInput.firstDaYun}
 - 大运方向: ${direction}
 
 请严格按照JSON格式输出，不要添加任何额外的文字说明。`;
