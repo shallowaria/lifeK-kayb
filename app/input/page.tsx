@@ -2,12 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserInput, LifeDestinyResult } from '@/types';
+import { UserInput } from '@/types';
 import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
 import StepIndicator from '@/components/shared/StepIndicator';
 import BaziForm from '@/components/BaziForm';
-import PromptGenerator from '@/components/PromptGenerator';
-import JsonImporter from '@/components/JsonImporter';
 
 export default function InputPage() {
   const router = useRouter();
@@ -24,20 +22,18 @@ export default function InputPage() {
     }
   }, []);
 
-  const handleBaziFormSubmit = async (data: UserInput, autoGenerate = false) => {
+  const handleBaziFormSubmit = async (data: UserInput) => {
     setUserInput(data);
     saveToLocalStorage('userInput', data);
 
-    if (autoGenerate) {
-      await handleAutoGenerate(data);
-    } else {
-      setCurrentStep(2);
-    }
+    // 直接开始 AI 生成
+    await handleAutoGenerate(data);
   };
 
   const handleAutoGenerate = async (data: UserInput) => {
     setIsGenerating(true);
     setGenerationError('');
+    setCurrentStep(2); // 进度条显示为步骤 2
 
     try {
       const response = await fetch('/api/generate-destiny', {
@@ -63,34 +59,17 @@ export default function InputPage() {
     } catch (error) {
       console.error('自动生成失败:', error);
       setGenerationError(
-        error instanceof Error ? error.message : '生成失败，请尝试手动导入'
+        error instanceof Error ? error.message : '生成失败，请重试'
       );
-      // 失败后跳转到手动流程
-      setCurrentStep(2);
+      setCurrentStep(1); // 失败后回到步骤 1
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handlePromptNext = () => {
-    setCurrentStep(3);
-  };
-
-  const handlePromptBack = () => {
+  const handleRetry = () => {
+    setGenerationError('');
     setCurrentStep(1);
-  };
-
-  const handleJsonImport = (data: LifeDestinyResult) => {
-    // 保存结果数据
-    saveToLocalStorage('lifeDestinyResult', data);
-    saveToLocalStorage('userName', userInput?.name || '未命名');
-
-    // 跳转到结果页面
-    router.push('/result');
-  };
-
-  const handleJsonBack = () => {
-    setCurrentStep(2);
   };
 
   return (
@@ -107,7 +86,7 @@ export default function InputPage() {
         </div>
 
         {/* 步骤指示器 */}
-        <StepIndicator currentStep={currentStep} totalSteps={3} />
+        <StepIndicator currentStep={currentStep} totalSteps={2} />
 
         {/* 内容卡片 */}
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
@@ -120,11 +99,11 @@ export default function InputPage() {
                   正在生成您的人生 K 线图...
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  AI 正在分析您的八字命理，这可能需要 30-60 秒
+                  AI 正在分析您的八字命理，预计需要 30-60 秒
                 </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-md mx-auto">
                   <p className="text-sm text-blue-800">
-                    提示：如果生成失败，系统将自动切换到手动导入模式
+                    💡 生成中包含：30年运势数据、支撑/压力位分析、个性化行动建议
                   </p>
                 </div>
               </div>
@@ -133,32 +112,26 @@ export default function InputPage() {
 
           {/* 错误提示 */}
           {generationError && !isGenerating && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-red-900 mb-2">自动生成失败</h3>
-              <p className="text-sm text-red-700">{generationError}</p>
-              <p className="text-sm text-red-700 mt-2">
-                已切换到手动模式，您可以继续使用提示词生成功能
-              </p>
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h3 className="font-semibold text-red-900 mb-2">生成失败</h3>
+                <p className="text-sm text-red-700 mb-4">{generationError}</p>
+              </div>
+              <button
+                onClick={handleRetry}
+                className="w-full px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+              >
+                返回重新填写
+              </button>
             </div>
           )}
 
+          {/* 步骤 1: 填写八字信息 */}
           {!isGenerating && currentStep === 1 && (
             <BaziForm
               onSubmit={handleBaziFormSubmit}
               initialData={userInput || undefined}
             />
-          )}
-
-          {!isGenerating && currentStep === 2 && userInput && (
-            <PromptGenerator
-              userInput={userInput}
-              onNext={handlePromptNext}
-              onBack={handlePromptBack}
-            />
-          )}
-
-          {!isGenerating && currentStep === 3 && (
-            <JsonImporter onImport={handleJsonImport} onBack={handleJsonBack} />
           )}
         </div>
 
