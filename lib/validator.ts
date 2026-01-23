@@ -1,4 +1,129 @@
-import { LifeDestinyResult, KLinePoint } from '@/types';
+import { LifeDestinyResult, KLinePoint, SupportPressureLevel, TenGod } from '@/types';
+
+/**
+ * 验证支撑/压力位数据
+ */
+function validateSupportPressureLevels(
+  levels: SupportPressureLevel[] | undefined
+): { valid: boolean; error?: string } {
+  if (!levels) return { valid: true }; // 可选字段
+
+  if (!Array.isArray(levels)) {
+    return { valid: false, error: 'supportPressureLevels 必须是数组' };
+  }
+
+  for (let i = 0; i < levels.length; i++) {
+    const level = levels[i];
+    const errorPrefix = `supportPressureLevels[${i}]`;
+
+    // 验证 value 范围（0-10）
+    if (typeof level.value !== 'number' || level.value < 0 || level.value > 10) {
+      return {
+        valid: false,
+        error: `${errorPrefix}.value 必须在 0-10 范围内（当前: ${level.value}）`,
+      };
+    }
+
+    // 验证 age 范围（1-100）
+    if (typeof level.age !== 'number' || level.age < 1 || level.age > 100) {
+      return {
+        valid: false,
+        error: `${errorPrefix}.age 必须在 1-100 范围内（当前: ${level.age}）`,
+      };
+    }
+
+    // 验证 type
+    if (level.type !== 'support' && level.type !== 'pressure') {
+      return {
+        valid: false,
+        error: `${errorPrefix}.type 必须是 'support' 或 'pressure'（当前: ${level.type}）`,
+      };
+    }
+
+    // 验证 strength
+    if (level.strength !== 'weak' && level.strength !== 'medium' && level.strength !== 'strong') {
+      return {
+        valid: false,
+        error: `${errorPrefix}.strength 必须是 'weak', 'medium', 或 'strong'（当前: ${level.strength}）`,
+      };
+    }
+
+    // 验证 reason
+    if (!level.reason || typeof level.reason !== 'string') {
+      return { valid: false, error: `${errorPrefix}.reason 必须是非空字符串` };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
+ * 验证十神类型
+ */
+function validateTenGod(tenGod: TenGod | undefined): boolean {
+  if (!tenGod) return true; // 可选字段
+
+  const validTenGods: TenGod[] = [
+    '比肩', '劫财', '食神', '伤官', '偏财', '正财', '七杀', '正官', '偏印', '正印'
+  ];
+  return validTenGods.includes(tenGod);
+}
+
+/**
+ * 验证能量分数
+ */
+function validateEnergyScore(
+  energyScore: any,
+  errorPrefix: string
+): { valid: boolean; error?: string } {
+  if (!energyScore) return { valid: true }; // 可选字段
+
+  if (typeof energyScore !== 'object') {
+    return { valid: false, error: `${errorPrefix}.energyScore 必须是对象` };
+  }
+
+  // 验证 total（0-10）
+  if (typeof energyScore.total !== 'number' || energyScore.total < 0 || energyScore.total > 10) {
+    return {
+      valid: false,
+      error: `${errorPrefix}.energyScore.total 必须在 0-10 范围内（当前: ${energyScore.total}）`,
+    };
+  }
+
+  // 验证 monthCoefficient（0-10）
+  if (typeof energyScore.monthCoefficient !== 'number' || energyScore.monthCoefficient < 0 || energyScore.monthCoefficient > 10) {
+    return {
+      valid: false,
+      error: `${errorPrefix}.energyScore.monthCoefficient 必须在 0-10 范围内`,
+    };
+  }
+
+  // 验证 dayRelation（0-10）
+  if (typeof energyScore.dayRelation !== 'number' || energyScore.dayRelation < 0 || energyScore.dayRelation > 10) {
+    return {
+      valid: false,
+      error: `${errorPrefix}.energyScore.dayRelation 必须在 0-10 范围内`,
+    };
+  }
+
+  // 验证 hourFluctuation（0-10）
+  if (typeof energyScore.hourFluctuation !== 'number' || energyScore.hourFluctuation < 0 || energyScore.hourFluctuation > 10) {
+    return {
+      valid: false,
+      error: `${errorPrefix}.energyScore.hourFluctuation 必须在 0-10 范围内`,
+    };
+  }
+
+  // 验证 isBelowSupport（boolean）
+  if (typeof energyScore.isBelowSupport !== 'boolean') {
+    return {
+      valid: false,
+      error: `${errorPrefix}.energyScore.isBelowSupport 必须是布尔值`,
+    };
+  }
+
+  return { valid: true };
+}
 
 /**
  * 验证 JSON 数据的完整性
@@ -139,6 +264,20 @@ export function validateChartData(data: unknown): {
         error: `${errorPrefix}.low (${point.low}) 必须 <= min(open, close) (${minOC})`,
       };
     }
+
+    // 验证十神（可选字段）
+    if (point.tenGod && !validateTenGod(point.tenGod)) {
+      return {
+        valid: false,
+        error: `${errorPrefix}.tenGod 必须是有效的十神类型（当前: ${point.tenGod}）`,
+      };
+    }
+
+    // 验证能量分数（可选字段）
+    const energyValidation = validateEnergyScore(point.energyScore, errorPrefix);
+    if (!energyValidation.valid) {
+      return energyValidation;
+    }
   }
 
   // 验证分析字段的评分
@@ -162,6 +301,12 @@ export function validateChartData(data: unknown): {
         error: `analysis.${field} 必须在 0-10 范围内`,
       };
     }
+  }
+
+  // 验证支撑/压力位（可选字段）
+  const spValidation = validateSupportPressureLevels(analysis.supportPressureLevels);
+  if (!spValidation.valid) {
+    return spValidation;
   }
 
   return { valid: true };

@@ -8,6 +8,7 @@ import { getDailyViewRange, getWeeklyViewRange, calculateVirtualAge } from '@/li
 import { interpolateDailyData } from '@/lib/interpolation';
 import LifeKLineChart from '@/components/LifeKLineChart';
 import AnalysisResult from '@/components/AnalysisResult';
+import RiskWarningBanner from '@/components/RiskWarningBanner';
 import ViewSwitcher, { ViewMode } from '@/components/ViewSwitcher';
 import Button from '@/components/shared/Button';
 import { Download, FileJson, Printer, RotateCcw } from 'lucide-react';
@@ -78,7 +79,7 @@ export default function ResultPage() {
       case 'year':
         return '人生流年大运K线图（100年全景）';
 
-      case 'week': {
+      case 'mouth': {
         const { start, end } = getWeeklyViewRange(currentDate);
         return `近期运势走势（${formatRange(start, end)}）`;
       }
@@ -100,6 +101,29 @@ export default function ResultPage() {
 
   const handleExportHtml = () => {
     if (!result) return;
+
+    // 生成支撑压力位表格（如果有）
+    const spLevelsTable = result.analysis.supportPressureLevels &&
+      result.analysis.supportPressureLevels.length > 0
+      ? `
+  <div class="section">
+    <h2>支撑位与压力位分析</h2>
+    <table>
+      <tr><th>年龄</th><th>类型</th><th>强度</th><th>数值</th><th>十神</th><th>原因</th></tr>
+      ${result.analysis.supportPressureLevels.map(level => `
+        <tr>
+          <td>${level.age}</td>
+          <td>${level.type === 'support' ? '🟢 支撑位' : '🔴 压力位'}</td>
+          <td>${level.strength === 'strong' ? '强' : level.strength === 'medium' ? '中' : '弱'}</td>
+          <td>${level.value}</td>
+          <td>${level.tenGod || '-'}</td>
+          <td>${level.reason}</td>
+        </tr>
+      `).join('')}
+    </table>
+  </div>
+      `
+      : '';
 
     // 生成简单的 HTML 内容
     const htmlContent = `
@@ -160,6 +184,8 @@ export default function ResultPage() {
       <tr><td>币圈</td><td>${result.analysis.cryptoScore}/10</td><td>${result.analysis.crypto}<br/>暴富流年：${result.analysis.cryptoYear}<br/>推荐流派：${result.analysis.cryptoStyle}</td></tr>
     </table>
   </div>
+
+  ${spLevelsTable}
 
   <div class="section">
     <h2>流年详批（1-100岁）</h2>
@@ -290,12 +316,18 @@ export default function ResultPage() {
           </div>
         </div>
 
+        {/* 新增：风险警告横幅 */}
+        {result && chartData.length > 0 && (
+          <RiskWarningBanner data={chartData} viewMode={viewMode} />
+        )}
+
         {/* K线图展示 */}
         <div className="mb-8">
           <LifeKLineChart
             data={chartData}
             viewMode={viewMode}
             title={getChartTitle()}
+            supportPressureLevels={result?.analysis.supportPressureLevels}
           />
           {viewMode !== 'year' && (
             <div className="mt-4 text-center text-sm text-gray-500">

@@ -3,7 +3,7 @@
 import React from 'react';
 import { Calendar, CalendarRange, CalendarDays } from 'lucide-react';
 
-export type ViewMode = 'year' | 'week' | 'day';
+export type ViewMode = 'year' | 'mouth' | 'day';
 
 interface ViewSwitcherProps {
   currentView: ViewMode;
@@ -25,15 +25,15 @@ export default function ViewSwitcher({ currentView, onViewChange }: ViewSwitcher
         年视图
       </button>
       <button
-        onClick={() => onViewChange('week')}
+        onClick={() => onViewChange('mouth')}
         className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-          currentView === 'week'
+          currentView === 'mouth'
             ? 'bg-white text-red-600 font-semibold shadow-sm'
             : 'text-gray-600 hover:text-gray-900'
         }`}
       >
         <CalendarRange className="w-4 h-4" />
-        周视图
+        月视图
       </button>
       <button
         onClick={() => onViewChange('day')}

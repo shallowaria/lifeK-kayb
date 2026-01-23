@@ -13,12 +13,13 @@ import {
   Label,
   LabelList
 } from 'recharts';
-import { KLinePoint, InterpolatedKLinePoint } from '@/types';
+import { KLinePoint, InterpolatedKLinePoint, SupportPressureLevel } from '@/types';
 
 interface LifeKLineChartProps {
   data: KLinePoint[] | InterpolatedKLinePoint[];
-  viewMode?: 'year' | 'week' | 'day'; // 视图模式
+  viewMode?: 'year' | 'mouth' | 'day'; // 视图模式
   title?: string;                      // 自定义标题
+  supportPressureLevels?: SupportPressureLevel[];  // 支撑/压力位列表
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -46,6 +47,12 @@ const CustomTooltip = ({ active, payload }: any) => {
             <p className="text-sm text-indigo-600 font-medium mt-1">
               大运：{data.daYun || '未知'}
             </p>
+            {/* 新增：显示十神 */}
+            {data.tenGod && (
+              <p className="text-sm text-purple-600 font-medium mt-1">
+                十神：{data.tenGod}
+              </p>
+            )}
           </div>
           <div className={`text-base font-bold px-2 py-1 rounded ${isUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
             {isUp ? '吉 ▲' : '凶 ▼'}
@@ -71,6 +78,43 @@ const CustomTooltip = ({ active, payload }: any) => {
             <span className="font-mono text-gray-700 font-bold">{data.low}</span>
           </div>
         </div>
+
+        {/* 新增：能量分数显示 */}
+        {data.energyScore && (
+          <div className="mt-3 mb-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-bold text-blue-900">能量分数</span>
+              <span className={`text-lg font-bold ${
+                data.energyScore.isBelowSupport
+                  ? 'text-red-600'
+                  : data.energyScore.total >= 7
+                    ? 'text-green-600'
+                    : 'text-gray-700'
+              }`}>
+                {data.energyScore.total.toFixed(1)}
+              </span>
+            </div>
+            <div className="space-y-1 text-xs text-gray-600">
+              <div className="flex justify-between">
+                <span>月令系数:</span>
+                <span className="font-mono">{data.energyScore.monthCoefficient}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>日支关系:</span>
+                <span className="font-mono">{data.energyScore.dayRelation}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>时辰波动:</span>
+                <span className="font-mono">{data.energyScore.hourFluctuation}</span>
+              </div>
+            </div>
+            {data.energyScore.isBelowSupport && (
+              <div className="mt-2 text-xs text-red-700 font-medium">
+                ⚠️ 已跌破支撑位
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Detailed Reason */}
         <div className="text-sm text-gray-700 leading-relaxed text-justify max-h-[200px] overflow-y-auto custom-scrollbar">
@@ -159,7 +203,7 @@ const PeakLabel = (props: any) => {
   );
 };
 
-const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year', title }) => {
+const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year', title, supportPressureLevels = [] }) => {
   const transformedData = data.map(d => ({
     ...d,
     bodyRange: [Math.min(d.open, d.close), Math.max(d.open, d.close)],
@@ -176,6 +220,19 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
   // Calculate Global Max High for the peak label
   const maxHigh = data.length > 0 ? Math.max(...data.map(d => d.high)) : 100;
 
+  // 根据视图模式筛选适用的支撑压力位
+  const visibleLevels = React.useMemo(() => {
+    if (!supportPressureLevels || supportPressureLevels.length === 0) return [];
+
+    // 在所有视图模式下都显示基于 age 的支撑压力位
+    // 简化处理：直接显示所有支撑压力位
+    return supportPressureLevels;
+  }, [supportPressureLevels, viewMode]);
+
+  // 分离支撑位和压力位
+  const supportLevels = visibleLevels.filter(l => l.type === 'support');
+  const pressureLevels = visibleLevels.filter(l => l.type === 'pressure');
+
   // 根据视图模式配置 X 轴
   const getXAxisConfig = () => {
     switch (viewMode) {
@@ -189,7 +246,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
           },
           label: { value: '日期', position: 'insideBottomRight' as const, offset: -5, fontSize: 10, fill: '#9ca3af' }
         };
-      case 'week':
+      case 'mouth':
         return {
           dataKey: 'date',
           interval: 6, // 每7天显示一次
@@ -267,6 +324,44 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
                  className="hidden md:block"
                />
              </ReferenceLine>
+          ))}
+
+          {/* 新增：支撑位参考线（绿色虚线）*/}
+          {supportLevels.map((level, idx) => (
+            <ReferenceLine
+              key={`support-${idx}`}
+              y={level.value * 10}
+              stroke="#22c55e"
+              strokeDasharray="5 5"
+              strokeWidth={2}
+              opacity={0.7}
+              label={{
+                value: `支撑 ${level.value}分: ${level.reason}`,
+                position: 'insideTopLeft',
+                fill: '#15803d',
+                fontSize: 10,
+                fontWeight: 'bold'
+              }}
+            />
+          ))}
+
+          {/* 新增：压力位参考线（红色虚线）*/}
+          {pressureLevels.map((level, idx) => (
+            <ReferenceLine
+              key={`pressure-${idx}`}
+              y={level.value * 10}
+              stroke="#ef4444"
+              strokeDasharray="5 5"
+              strokeWidth={2}
+              opacity={0.7}
+              label={{
+                value: `压力 ${level.value}分: ${level.reason}`,
+                position: 'insideBottomLeft',
+                fill: '#b91c1c',
+                fontSize: 10,
+                fontWeight: 'bold'
+              }}
+            />
           ))}
 
           <Bar

@@ -16,7 +16,22 @@ export const BAZI_SYSTEM_INSTRUCTION = `
 - \`daYun\`: 大运干支 (10年不变)
 - \`ganZhi\`: 流年干支 (每年一变)
 
-**输出JSON结构:**
+**十神与支撑压力位分析（新增）:**
+1. 为每个流年标注主要十神（比肩、劫财、食神、伤官、偏财、正财、七杀、正官、偏印、正印）
+2. 识别关键的支撑位年份：
+   - 印星年份（正印/偏印）：贵人相助，能量支撑
+   - 比劫年份（比肩/劫财）：自身底气，内在支撑
+3. 识别关键的压力位年份：
+   - 七杀年份：挑战压力，需防守
+   - 伤官见官：冲突压力
+   - 枭神夺食（偏印克食神）：能量受阻
+4. 为每年计算能量分数 (0-10分)：
+   - 月令系数：当前大运对日主的生扶力度
+   - 日支关系：流年干支与日柱的和谐度
+   - 时辰波动：基于出生时辰的微调因子
+   - isBelowSupport：判断是否低于历史支撑位
+
+**输出JSON结构（扩展）:**
 
 {
   "bazi": ["年柱", "月柱", "日柱", "时柱"],
@@ -41,10 +56,54 @@ export const BAZI_SYSTEM_INSTRUCTION = `
   "cryptoYear": "暴富流年",
   "cryptoStyle": "链上Alpha/高倍合约/现货定投",
   "chartPoints": [
-    {"age":1,"year":1990,"daYun":"童限","ganZhi":"庚午","open":50,"close":55,"high":60,"low":45,"score":55,"reason":"开局平稳，家庭呵护"},
+    {
+      "age": 1,
+      "year": 1990,
+      "daYun": "童限",
+      "ganZhi": "庚午",
+      "tenGod": "偏印",
+      "open": 50,
+      "close": 55,
+      "high": 60,
+      "low": 45,
+      "score": 55,
+      "reason": "开局平稳，家庭呵护",
+      "energyScore": {
+        "total": 6.5,
+        "monthCoefficient": 7,
+        "dayRelation": 6,
+        "hourFluctuation": 5,
+        "isBelowSupport": false
+      }
+    },
     ... (共100条，reason控制在20-30字)
+  ],
+  "supportPressureLevels": [
+    {
+      "age": 25,
+      "type": "support",
+      "value": 6.5,
+      "strength": "strong",
+      "reason": "正印护身，贵人相助",
+      "tenGod": "正印"
+    },
+    {
+      "age": 35,
+      "type": "pressure",
+      "value": 4.0,
+      "strength": "medium",
+      "reason": "七杀攻身，需谨慎应对",
+      "tenGod": "七杀"
+    },
+    ... (标注关键的支撑压力位，通常 5-15 个)
   ]
 }
+
+**重要说明:**
+- energyScore 为可选字段，如果计算困难可省略，但必须生成 supportPressureLevels
+- supportPressureLevels 中的 value 是 Y 轴位置（0-10），应对应该年份的大致运势分数
+- 支撑位通常在运势较低区域，压力位通常在运势较高或转折区域
+- 至少标注 5-15 个关键的支撑压力位，涵盖人生重要转折点
 
 **币圈分析逻辑:**
 - 偏财旺、身强 -> "链上Alpha"

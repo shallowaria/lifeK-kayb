@@ -1,0 +1,89 @@
+{
+  "bazi": ["辛巳", "辛卯", "癸未", "辛酉"],
+  "summary": "日主癸水生于卯月，金多生水，身偏强。早年波动，中晚年运势抬升，贵人与压力并存，适合顺势而为，把握周期节奏。",
+  "summaryScore": 8,
+  "personality": "思维敏锐，直觉强，外冷内热。遇事多思考路径，情绪受环境影响大，顺境易放大优势，逆境需稳心态。",
+  "personalityScore": 8,
+  "industry": "适合技术、金融、数据、区块链等周期性行业，前期积累认知，中后期凭判断力获得跃迁。",
+  "industryScore": 7,
+  "fengShui": "宜西北、西方金水之地，近水或高处为佳。办公宜简洁冷色调，助专注与决策稳定。",
+  "fengShuiScore": 8,
+  "wealth": "正偏财皆有，但偏财更显。需控制贪念，顺周期布局，避免情绪化交易。",
+  "wealthScore": 9,
+  "marriage": "感情慢热，早期易有拉扯，中后期稳定度提升，需学会表达真实需求。",
+  "marriageScore": 6,
+  "health": "注意肾水、睡眠与情绪压力，作息紊乱时易透支精力。",
+  "healthScore": 5,
+  "family": "与家人缘分尚可，关键阶段易得长辈支持，但需主动沟通减少误解。",
+  "familyScore": 7,
+  "crypto": "命局偏财明显，适合捕捉结构性机会，重视风控可穿越牛熊。",
+  "cryptoScore": 8,
+  "cryptoYear": "2029",
+  "cryptoStyle": "链上Alpha",
+  "supportPressureLevels": [
+    {
+      "age": 6,
+      "type": "support",
+      "value": 6.0,
+      "strength": "medium",
+      "reason": "偏印生身，学习与认知能力被激活",
+      "tenGod": "偏印"
+    },
+    {
+      "age": 12,
+      "type": "pressure",
+      "value": 4.5,
+      "strength": "medium",
+      "reason": "七杀临身，环境要求提高，压力显现",
+      "tenGod": "七杀"
+    },
+    {
+      "age": 18,
+      "type": "support",
+      "value": 6.8,
+      "strength": "strong",
+      "reason": "正印发力，贵人出现，方向逐渐清晰",
+      "tenGod": "正印"
+    },
+    {
+      "age": 25,
+      "type": "support",
+      "value": 7.2,
+      "strength": "strong",
+      "reason": "比肩助力，自身底气增强，开始突破",
+      "tenGod": "比肩"
+    },
+    {
+      "age": 29,
+      "type": "pressure",
+      "value": 5.0,
+      "strength": "medium",
+      "reason": "伤官见官，决策冲突，需控制风险",
+      "tenGod": "伤官"
+    },
+    {
+      "age": 35,
+      "type": "pressure",
+      "value": 4.0,
+      "strength": "medium",
+      "reason": "七杀攻身，外部竞争加剧，宜防守",
+      "tenGod": "七杀"
+    },
+    {
+      "age": 42,
+      "type": "support",
+      "value": 7.5,
+      "strength": "strong",
+      "reason": "正财稳固，积累兑现，运势回升",
+      "tenGod": "正财"
+    },
+    {
+      "age": 49,
+      "type": "support",
+      "value": 7.8,
+      "strength": "strong",
+      "reason": "偏财再现，机会集中，适合放大收益",
+      "tenGod": "偏财"
+    }
+  ]
+}

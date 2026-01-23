@@ -152,6 +152,8 @@ export function transformToLifeDestinyResult(data: RawAIResponse): LifeDestinyRe
       healthScore: normalizeScore(data.analysis.healthScore || 0),
       familyScore: normalizeScore(data.analysis.familyScore || 0),
       cryptoScore: normalizeScore(data.analysis.cryptoScore || 0),
+      // 保留 supportPressureLevels（如果存在）
+      supportPressureLevels: data.analysis.supportPressureLevels || undefined,
     };
 
     return {
@@ -194,6 +196,8 @@ export function transformToLifeDestinyResult(data: RawAIResponse): LifeDestinyRe
     cryptoScore: normalizeScore(flatData.cryptoScore || 0),
     cryptoYear: flatData.cryptoYear || '',
     cryptoStyle: flatData.cryptoStyle || '',
+    // 支撑/压力位列表（可选字段）
+    supportPressureLevels: flatData.supportPressureLevels || undefined,
   };
 
   return {

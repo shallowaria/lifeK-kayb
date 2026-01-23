@@ -15,6 +15,34 @@ export interface UserInput {
   startAge: string;    // 起运年龄 (虚岁)
 }
 
+// 十神类型（用于标识吉凶神煞）
+export type TenGod =
+  | '比肩' | '劫财'      // 支撑（帮助）
+  | '食神' | '伤官'      // 中性/压力
+  | '偏财' | '正财'      // 财运
+  | '七杀' | '正官'      // 压力（挑战）
+  | '偏印' | '正印';     // 支撑（贵人）
+
+// 能量分数
+export interface EnergyScore {
+  total: number;            // 总分（0-10）
+  monthCoefficient: number; // 月令系数
+  dayRelation: number;      // 日支关系
+  hourFluctuation: number;  // 时辰波动
+  isBelowSupport: boolean;  // 是否跌破支撑位
+}
+
+// 支撑/压力位数据结构
+export interface SupportPressureLevel {
+  age: number;              // 适用年龄
+  date?: string;            // 日视图/周视图的日期 (YYYY-MM-DD)
+  type: 'support' | 'pressure';  // 类型
+  value: number;            // Y轴位置（0-10 分）
+  strength: 'weak' | 'medium' | 'strong';  // 强度
+  reason: string;           // 原因说明（如"印星护身"）
+  tenGod?: TenGod;          // 关联的十神
+}
+
 export interface KLinePoint {
   age: number;
   year: number;
@@ -26,6 +54,8 @@ export interface KLinePoint {
   low: number;
   score: number;
   reason: string; // 详细的流年描述 (20-30字)
+  tenGod?: TenGod;          // 主要十神
+  energyScore?: EnergyScore; // 能量分数（可选）
 }
 
 export interface AnalysisData {
@@ -59,6 +89,9 @@ export interface AnalysisData {
   cryptoScore: number;  // 投机运势评分
   cryptoYear: string;   // 暴富流年 (e.g., 2025年 (乙巳))
   cryptoStyle: string;  // 适合流派 (现货定投/高倍合约/链上Alpha)
+
+  // 支撑/压力位分析（新增）
+  supportPressureLevels?: SupportPressureLevel[];  // 支撑/压力位列表
 }
 
 export interface LifeDestinyResult {
@@ -94,6 +127,8 @@ export interface RawKLinePoint {
   low: number;
   score: number; // 可能是 0-10 或 0-100
   reason: string;
+  tenGod?: TenGod;          // 主要十神
+  energyScore?: EnergyScore; // 能量分数（可选）
 }
 
 // AI 返回的原始分析数据（所有 score 字段可能是 0-100 范围）
@@ -119,6 +154,7 @@ export interface RawAnalysisData {
   cryptoScore: number;
   cryptoYear: string;
   cryptoStyle: string;
+  supportPressureLevels?: SupportPressureLevel[];  // 支撑/压力位列表
 }
 
 // AI 返回的原始数据格式（可能是扁平或嵌套格式）
