@@ -1,25 +1,97 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { LifeDestinyResult } from '@/types';
-import { loadFromLocalStorage, exportToJson, exportToHtml } from '@/lib/utils';
+import { LifeDestinyResult, UserInput } from '@/types';
+import { loadFromLocalStorage, exportToJson, exportToHtml, migrateLegacyUserInput } from '@/lib/utils';
+import { getDailyViewRange, getWeeklyViewRange, calculateVirtualAge } from '@/lib/date-utils';
+import { interpolateDailyData } from '@/lib/interpolation';
 import LifeKLineChart from '@/components/LifeKLineChart';
 import AnalysisResult from '@/components/AnalysisResult';
+import ViewSwitcher, { ViewMode } from '@/components/ViewSwitcher';
 import Button from '@/components/shared/Button';
 import { Download, FileJson, Printer, RotateCcw } from 'lucide-react';
 
 export default function ResultPage() {
   const router = useRouter();
+  const [viewMode, setViewMode] = useState<ViewMode>('year');
+  const [currentDate] = useState(new Date());
+
   const [result] = useState<LifeDestinyResult | null>(() => {
     if (typeof window === 'undefined') return null;
     return loadFromLocalStorage<LifeDestinyResult>('lifeDestinyResult');
+  });
+
+  const [userInput] = useState<UserInput | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const input = loadFromLocalStorage<UserInput>('userInput');
+    return input ? migrateLegacyUserInput(input) : null;
   });
 
   const [userName] = useState<string>(() => {
     if (typeof window === 'undefined') return '未命名';
     return loadFromLocalStorage<string>('userName') || '未命名';
   });
+
+  // 根据视图模式计算显示的数据
+  const chartData = useMemo(() => {
+    if (!result) return [];
+
+    if (viewMode === 'year') {
+      return result.chartData;
+    }
+
+    // 日视图和周视图需要出生日期
+    if (!userInput?.birthDate) {
+      console.warn('Birth date not available, falling back to year view');
+      return result.chartData;
+    }
+
+    const birthDate = new Date(userInput.birthDate);
+    const range = viewMode === 'day'
+      ? getDailyViewRange(currentDate)
+      : getWeeklyViewRange(currentDate);
+
+    return interpolateDailyData(range, birthDate, result.chartData);
+  }, [result, userInput, viewMode, currentDate]);
+
+  // 计算当前虚岁
+  const currentAge = useMemo(() => {
+    if (!userInput?.birthDate) return null;
+    return calculateVirtualAge(new Date(userInput.birthDate), currentDate);
+  }, [userInput, currentDate]);
+
+  // 格式化日期
+  const formatDate = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}/${m}/${d}`;
+  };
+
+  const formatRange = (start: Date, end: Date) =>
+    `${formatDate(start)} - ${formatDate(end)}`;
+
+  // 获取图表标题
+  const getChartTitle = () => {
+    switch (viewMode) {
+      case 'year':
+        return '人生流年大运K线图（100年全景）';
+
+      case 'week': {
+        const { start, end } = getWeeklyViewRange(currentDate);
+        return `近期运势走势（${formatRange(start, end)}）`;
+      }
+
+      case 'day': {
+        const { start, end } = getDailyViewRange(currentDate);
+        return `每日运势详情（${formatRange(start, end)}）`;
+      }
+
+      default:
+        return '人生流年大运K线图';
+    }
+  };
 
   const handleExportJson = () => {
     if (!result) return;
@@ -194,13 +266,48 @@ export default function ResultPage() {
           </div>
         </div>
 
-        {/* K线图 */}
-        <div className="mb-8">
-          <LifeKLineChart data={result.chartData} />
+        {/* 视图切换器 */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">
+                运势时间轴
+              </h2>
+              {currentAge && (
+                <p className="text-sm text-gray-600">
+                  当前虚岁：{currentAge}岁 | 今日：{currentDate.toLocaleDateString('zh-CN')}
+                </p>
+              )}
+              {!userInput?.birthDate && (
+                <p className="text-sm text-orange-600 mt-2">
+                  提示：完整出生日期缺失，仅支持年视图。请重新输入八字以启用日/周视图。
+                </p>
+              )}
+            </div>
+            {userInput?.birthDate && (
+              <ViewSwitcher currentView={viewMode} onViewChange={setViewMode} />
+            )}
+          </div>
         </div>
 
-        {/* 命理分析 */}
-        <AnalysisResult analysis={result.analysis} />
+        {/* K线图展示 */}
+        <div className="mb-8">
+          <LifeKLineChart
+            data={chartData}
+            viewMode={viewMode}
+            title={getChartTitle()}
+          />
+          {viewMode !== 'year' && (
+            <div className="mt-4 text-center text-sm text-gray-500">
+              <p>📊 数据基于年度运势插值计算，仅供参考</p>
+            </div>
+          )}
+        </div>
+
+        {/* 命理分析面板（仅在年视图显示） */}
+        {viewMode === 'year' && (
+          <AnalysisResult analysis={result.analysis} />
+        )}
 
         {/* 免责声明 */}
         <div className="mt-12 text-center text-sm text-gray-500 no-print">

@@ -9,11 +9,25 @@ declare module 'lunar-javascript' {
       second: number
     ): Solar;
 
+    static fromYmd(year: number, month: number, day: number): Solar;
+
     getLunar(): Lunar;
+    getYear(): number;
+    getMonth(): number;
+    getDay(): number;
+    toDate(): Date;
   }
 
   export class Lunar {
+    static fromYmd(year: number, month: number, day: number): Lunar;
+
     getEightChar(): EightChar;
+    getYear(): number;
+    getMonth(): number;
+    getDay(): number;
+    getDayInChinese(): string;
+    getSolar(): Solar;
+    next(days: number): Lunar;
   }
 
   export class EightChar {

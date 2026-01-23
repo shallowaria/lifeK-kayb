@@ -1,4 +1,4 @@
-import { Gender, UserInput, LifeDestinyResult } from '@/types';
+import { Gender, UserInput, LifeDestinyResult, RawAIResponse, RawKLinePoint, RawAnalysisData } from '@/types';
 import { BAZI_SYSTEM_INSTRUCTION } from './constants';
 
 /**
@@ -36,7 +36,7 @@ export function cleanMarkdown(text: string): string {
  * 生成用户提示词
  */
 export function generateUserPrompt(userInput: UserInput): string {
-  const { isForward, text: direction } = getDaYunDirection(
+  const { text: direction } = getDaYunDirection(
     userInput.yearPillar,
     userInput.gender
   );
@@ -131,11 +131,11 @@ function normalizeScore(score: number): number {
  * 转换扁平 JSON 为嵌套结构
  * 兼容 AI 返回的扁平格式（chartPoints）和标准嵌套格式（chartData + analysis）
  */
-export function transformToLifeDestinyResult(data: any): LifeDestinyResult {
+export function transformToLifeDestinyResult(data: RawAIResponse): LifeDestinyResult {
   // 如果已经是正确的嵌套格式，检查并转换 score
-  if (data.chartData && data.analysis) {
+  if ('chartData' in data && 'analysis' in data && data.analysis && Array.isArray(data.chartData)) {
     // 转换 chartData 中的 score
-    const normalizedChartData = data.chartData.map((point: any) => ({
+    const normalizedChartData = data.chartData.map((point: RawKLinePoint) => ({
       ...point,
       score: normalizeScore(point.score || 0),
     }));
@@ -162,39 +162,59 @@ export function transformToLifeDestinyResult(data: any): LifeDestinyResult {
 
   // 处理扁平格式（AI 直接返回的格式）
   // chartPoints -> chartData，并标准化 score
-  const rawChartData = data.chartPoints || data.chartData || [];
-  const chartData = rawChartData.map((point: any) => ({
+  const rawChartData = ('chartPoints' in data && data.chartPoints) ||
+                       ('chartData' in data && data.chartData) ||
+                       [];
+  const chartData = rawChartData.map((point: RawKLinePoint) => ({
     ...point,
     score: normalizeScore(point.score || 0),
   }));
 
   // 提取所有分析字段到 analysis 对象，并标准化评分
+  const flatData = data as RawAnalysisData & { chartPoints?: RawKLinePoint[]; chartData?: RawKLinePoint[] };
   const analysis = {
-    bazi: data.bazi || [],
-    summary: data.summary || '',
-    summaryScore: normalizeScore(data.summaryScore || 0),
-    personality: data.personality || '',
-    personalityScore: normalizeScore(data.personalityScore || 0),
-    industry: data.industry || '',
-    industryScore: normalizeScore(data.industryScore || 0),
-    fengShui: data.fengShui || '',
-    fengShuiScore: normalizeScore(data.fengShuiScore || 0),
-    wealth: data.wealth || '',
-    wealthScore: normalizeScore(data.wealthScore || 0),
-    marriage: data.marriage || '',
-    marriageScore: normalizeScore(data.marriageScore || 0),
-    health: data.health || '',
-    healthScore: normalizeScore(data.healthScore || 0),
-    family: data.family || '',
-    familyScore: normalizeScore(data.familyScore || 0),
-    crypto: data.crypto || '',
-    cryptoScore: normalizeScore(data.cryptoScore || 0),
-    cryptoYear: data.cryptoYear || '',
-    cryptoStyle: data.cryptoStyle || '',
+    bazi: flatData.bazi || [],
+    summary: flatData.summary || '',
+    summaryScore: normalizeScore(flatData.summaryScore || 0),
+    personality: flatData.personality || '',
+    personalityScore: normalizeScore(flatData.personalityScore || 0),
+    industry: flatData.industry || '',
+    industryScore: normalizeScore(flatData.industryScore || 0),
+    fengShui: flatData.fengShui || '',
+    fengShuiScore: normalizeScore(flatData.fengShuiScore || 0),
+    wealth: flatData.wealth || '',
+    wealthScore: normalizeScore(flatData.wealthScore || 0),
+    marriage: flatData.marriage || '',
+    marriageScore: normalizeScore(flatData.marriageScore || 0),
+    health: flatData.health || '',
+    healthScore: normalizeScore(flatData.healthScore || 0),
+    family: flatData.family || '',
+    familyScore: normalizeScore(flatData.familyScore || 0),
+    crypto: flatData.crypto || '',
+    cryptoScore: normalizeScore(flatData.cryptoScore || 0),
+    cryptoYear: flatData.cryptoYear || '',
+    cryptoStyle: flatData.cryptoStyle || '',
   };
 
   return {
     chartData,
     analysis,
   };
+}
+
+
+
+/**
+ * 迁移旧版 UserInput 数据（添加 birthDate 字段）
+ * 对于没有 birthDate 的旧数据，使用 birthYear 生成默认值
+ */
+export function migrateLegacyUserInput(input: UserInput): UserInput {
+  if (!input.birthDate && input.birthYear) {
+    // 如果没有完整日期，默认为该年的1月1日
+    return {
+      ...input,
+      birthDate: `${input.birthYear}-01-01`,
+    };
+  }
+  return input;
 }

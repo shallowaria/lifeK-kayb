@@ -23,6 +23,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState<string>('');
 
+
   // 当日期、时辰或性别变化时，自动计算八字
   useEffect(() => {
     if (birthDate && shiChen && gender) {
@@ -63,6 +64,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
         name,
         gender,
         birthYear: result.birthYear,
+        birthDate: birthDate,  // 保存完整日期 (YYYY-MM-DD)
         yearPillar: result.yearPillar,
         monthPillar: result.monthPillar,
         dayPillar: result.dayPillar,
@@ -110,7 +112,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="张三"
+          placeholder="凯布"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
         />
       </div>
@@ -146,10 +148,11 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
       {/* 出生日期 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor='birthDate'>
           出生日期（公历） <span className="text-red-600">*</span>
         </label>
         <input
+          id='birthDate'
           title="出生日期"
           type="date"
           value={birthDate}

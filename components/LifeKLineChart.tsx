@@ -13,23 +13,35 @@ import {
   Label,
   LabelList
 } from 'recharts';
-import { KLinePoint } from '@/types';
+import { KLinePoint, InterpolatedKLinePoint } from '@/types';
 
 interface LifeKLineChartProps {
-  data: KLinePoint[];
+  data: KLinePoint[] | InterpolatedKLinePoint[];
+  viewMode?: 'year' | 'week' | 'day'; // 视图模式
+  title?: string;                      // 自定义标题
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload as KLinePoint;
+    const data = payload[0].payload as KLinePoint | InterpolatedKLinePoint;
     const isUp = data.close >= data.open;
+    const isInterpolated = 'isInterpolated' in data && data.isInterpolated;
+
     return (
       <div className="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-2xl border border-gray-200 z-50 w-[320px] md:w-[400px]">
         {/* Header */}
         <div className="flex justify-between items-start mb-3 border-b border-gray-100 pb-2">
           <div>
             <p className="text-xl font-bold text-gray-800">
-              {data.year} {data.ganZhi}年 <span className="text-base text-gray-500">({data.age}岁)</span>
+              {isInterpolated && 'date' in data ? (
+                <>
+                  {data.date} <span className="text-base text-gray-500">({data.age}岁)</span>
+                </>
+              ) : (
+                <>
+                  {data.year} {data.ganZhi}年 <span className="text-base text-gray-500">({data.age}岁)</span>
+                </>
+              )}
             </p>
             <p className="text-sm text-indigo-600 font-medium mt-1">
               大运：{data.daYun || '未知'}
@@ -147,7 +159,7 @@ const PeakLabel = (props: any) => {
   );
 };
 
-const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data }) => {
+const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year', title }) => {
   const transformedData = data.map(d => ({
     ...d,
     bodyRange: [Math.min(d.open, d.close), Math.max(d.open, d.close)],
@@ -164,6 +176,41 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data }) => {
   // Calculate Global Max High for the peak label
   const maxHigh = data.length > 0 ? Math.max(...data.map(d => d.high)) : 100;
 
+  // 根据视图模式配置 X 轴
+  const getXAxisConfig = () => {
+    switch (viewMode) {
+      case 'day':
+        return {
+          dataKey: 'date',
+          interval: 0, // 显示所有日期
+          tickFormatter: (date: string) => {
+            const d = new Date(date);
+            return `${d.getMonth() + 1}/${d.getDate()}`;
+          },
+          label: { value: '日期', position: 'insideBottomRight' as const, offset: -5, fontSize: 10, fill: '#9ca3af' }
+        };
+      case 'week':
+        return {
+          dataKey: 'date',
+          interval: 6, // 每7天显示一次
+          tickFormatter: (date: string) => {
+            const d = new Date(date);
+            return `${d.getMonth() + 1}/${d.getDate()}`;
+          },
+          label: { value: '日期', position: 'insideBottomRight' as const, offset: -5, fontSize: 10, fill: '#9ca3af' }
+        };
+      default: // year
+        return {
+          dataKey: 'age',
+          interval: 9, // 每10岁显示一次
+          tickFormatter: undefined,
+          label: { value: '年龄', position: 'insideBottomRight' as const, offset: -5, fontSize: 10, fill: '#9ca3af' }
+        };
+    }
+  };
+
+  const xAxisConfig = getXAxisConfig();
+
   if (!data || data.length === 0) {
     return <div className="h-[500px] flex items-center justify-center text-gray-400">无数据</div>;
   }
@@ -171,7 +218,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data }) => {
   return (
     <div className="w-full h-[600px] bg-white p-2 md:p-6 rounded-xl border border-gray-200 shadow-sm relative">
       <div className="mb-6 flex justify-between items-center px-2">
-        <h3 className="text-xl font-bold text-gray-800">人生流年大运K线图</h3>
+        <h3 className="text-xl font-bold text-gray-800">{title || '人生流年大运K线图'}</h3>
         <div className="flex gap-4 text-xs font-medium">
            <span className="flex items-center text-green-700 bg-green-50 px-2 py-1 rounded"><div className="w-2 h-2 bg-green-500 mr-2 rounded-full"></div> 吉运 (涨)</span>
            <span className="flex items-center text-red-700 bg-red-50 px-2 py-1 rounded"><div className="w-2 h-2 bg-red-500 mr-2 rounded-full"></div> 凶运 (跌)</span>
@@ -183,12 +230,13 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data }) => {
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
 
           <XAxis
-            dataKey="age"
+            dataKey={xAxisConfig.dataKey}
             tick={{fontSize: 10, fill: '#6b7280'}}
-            interval={9}
+            interval={xAxisConfig.interval}
             axisLine={{ stroke: '#e5e7eb' }}
             tickLine={false}
-            label={{ value: '年龄', position: 'insideBottomRight', offset: -5, fontSize: 10, fill: '#9ca3af' }}
+            label={xAxisConfig.label}
+            tickFormatter={xAxisConfig.tickFormatter}
           />
 
           <YAxis
