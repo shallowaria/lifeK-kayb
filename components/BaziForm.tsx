@@ -7,7 +7,7 @@ import { SHI_CHEN_LIST } from '@/lib/constants/shi-chen';
 import Button from './shared/Button';
 
 interface BaziFormProps {
-  onSubmit: (data: UserInput) => void;
+  onSubmit: (data: UserInput, autoGenerate?: boolean) => void | Promise<void>;
   initialData?: Partial<UserInput>;
 }
 
@@ -89,7 +89,18 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
       return;
     }
 
-    onSubmit(calculatedData);
+    // 自动生成模式
+    onSubmit(calculatedData, true);
+  };
+
+  const handleManualMode = () => {
+    if (!calculatedData) {
+      setError('请先填写出生日期和时辰');
+      return;
+    }
+
+    // 手动模式
+    onSubmit(calculatedData, false);
   };
 
   return (
@@ -256,20 +267,36 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
       )}
 
       {/* 提交按钮 */}
-      <div className="pt-4">
+      <div className="space-y-4 pt-4">
+        {/* 主按钮：AI 自动生成 */}
         <Button
           type="submit"
           variant="primary"
           className="w-full"
           disabled={!calculatedData || calculating}
         >
-          {calculatedData ? '下一步：生成提示词' : '请先填写完整信息'}
+          {calculatedData ? '🤖 AI 自动生成（推荐）' : '请先填写完整信息'}
         </Button>
+
+        {/* 备用按钮：手动导入模式 */}
+        {calculatedData && (
+          <button
+            type="button"
+            onClick={handleManualMode}
+            className="w-full px-4 py-3 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors"
+          >
+            或使用手动导入模式（生成提示词）
+          </button>
+        )}
       </div>
 
       {/* 说明 */}
-      <div className="text-center text-xs text-gray-500 space-y-1">
-        <p>系统使用 lunar-javascript 库自动计算八字</p>
+      <div className="text-center text-xs text-gray-500 space-y-1 pt-2">
+        <p>• AI 自动生成：一键完成，约 30-60 秒</p>
+        <p>• 手动模式：复制提示词到 ChatGPT/Claude 等 AI 工具</p>
+        <p className="pt-2 border-t border-gray-200 mt-3">
+          系统使用 lunar-javascript 库自动计算八字
+        </p>
         <p>计算基于标准时间（东八区），不考虑真太阳时调整</p>
       </div>
     </form>

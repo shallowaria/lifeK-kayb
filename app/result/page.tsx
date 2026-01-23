@@ -78,7 +78,7 @@ export default function ResultPage() {
   const getChartTitle = () => {
     switch (viewMode) {
       case 'year':
-        return '人生流年大运K线图（100年全景）';
+        return '人生流年大运K线图(30年全景）';
 
       case 'mouth': {
         const { start, end } = getWeeklyViewRange(currentDate);
@@ -235,7 +235,7 @@ export default function ResultPage() {
   ${actionAdviceTable}
 
   <div class="section">
-    <h2>流年详批（1-100岁）</h2>
+    <h2>流年详批（1-30岁）</h2>
     <table>
       <tr><th>年龄</th><th>年份</th><th>干支</th><th>大运</th><th>评分</th><th>详批</th></tr>
       ${result.chartData.map(point => `

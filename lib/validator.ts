@@ -24,11 +24,11 @@ function validateSupportPressureLevels(
       };
     }
 
-    // 验证 age 范围（1-100）
-    if (typeof level.age !== 'number' || level.age < 1 || level.age > 100) {
+    // 验证 age 范围（1-30）
+    if (typeof level.age !== 'number' || level.age < 1 || level.age > 30) {
       return {
         valid: false,
-        error: `${errorPrefix}.age 必须在 1-100 范围内（当前: ${level.age}）`,
+        error: `${errorPrefix}.age 必须在 1-30 范围内（当前: ${level.age}）`,
       };
     }
 
@@ -221,10 +221,10 @@ export function validateChartData(data: unknown): {
     return { valid: false, error: '缺少 chartData 字段或格式错误' };
   }
 
-  if (result.chartData.length !== 100) {
+  if (result.chartData.length !== 30) {
     return {
       valid: false,
-      error: `chartData 必须包含 100 个数据点（当前: ${result.chartData.length}）`,
+      error: `chartData 必须包含 30 个数据点（当前: ${result.chartData.length}）`,
     };
   }
 
@@ -242,10 +242,10 @@ export function validateChartData(data: unknown): {
       return { valid: false, error: `${errorPrefix}.age 必须是数字` };
     }
 
-    if (point.age < 1 || point.age > 100) {
+    if (point.age < 1 || point.age > 30) {
       return {
         valid: false,
-        error: `${errorPrefix}.age 必须在 1-100 范围内（当前: ${point.age}）`,
+        error: `${errorPrefix}.age 必须在 1-30 范围内（当前: ${point.age}）`,
       };
     }
 

@@ -1,5 +1,5 @@
 import { Gender, UserInput, LifeDestinyResult, RawAIResponse, RawKLinePoint, RawAnalysisData } from '@/types';
-import { BAZI_SYSTEM_INSTRUCTION } from './constants';
+import { BAZI_SYSTEM_INSTRUCTION } from './constants-simple';
 
 /**
  * 判断大运方向（顺行/逆行）
