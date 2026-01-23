@@ -1,4 +1,4 @@
-import { LifeDestinyResult, KLinePoint, SupportPressureLevel, TenGod } from '@/types';
+import { LifeDestinyResult, KLinePoint, SupportPressureLevel, TenGod, ActionAdvice } from '@/types';
 
 /**
  * 验证支撑/压力位数据
@@ -119,6 +119,72 @@ function validateEnergyScore(
     return {
       valid: false,
       error: `${errorPrefix}.energyScore.isBelowSupport 必须是布尔值`,
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * 验证行动建议数据（可选字段）
+ */
+function validateActionAdvice(
+  actionAdvice: ActionAdvice | undefined,
+  errorPrefix: string
+): { valid: boolean; error?: string } {
+  if (!actionAdvice) return { valid: true }; // 可选字段
+
+  // 验证 suggestions（必须3条）
+  if (!Array.isArray(actionAdvice.suggestions) || actionAdvice.suggestions.length !== 3) {
+    return {
+      valid: false,
+      error: `${errorPrefix}.actionAdvice.suggestions 必须包含3条建议（当前: ${actionAdvice.suggestions?.length || 0}）`,
+    };
+  }
+
+  // 验证每条建议为非空字符串
+  for (let i = 0; i < actionAdvice.suggestions.length; i++) {
+    const suggestion = actionAdvice.suggestions[i];
+    if (!suggestion || typeof suggestion !== 'string' || suggestion.trim().length === 0) {
+      return {
+        valid: false,
+        error: `${errorPrefix}.actionAdvice.suggestions[${i}] 必须是非空字符串`,
+      };
+    }
+  }
+
+  // 验证 warnings（必须2条）
+  if (!Array.isArray(actionAdvice.warnings) || actionAdvice.warnings.length !== 2) {
+    return {
+      valid: false,
+      error: `${errorPrefix}.actionAdvice.warnings 必须包含2条规避提醒（当前: ${actionAdvice.warnings?.length || 0}）`,
+    };
+  }
+
+  // 验证每条警告为非空字符串
+  for (let i = 0; i < actionAdvice.warnings.length; i++) {
+    const warning = actionAdvice.warnings[i];
+    if (!warning || typeof warning !== 'string' || warning.trim().length === 0) {
+      return {
+        valid: false,
+        error: `${errorPrefix}.actionAdvice.warnings[${i}] 必须是非空字符串`,
+      };
+    }
+  }
+
+  // 验证 basis（可选，但若有则必须是字符串）
+  if (actionAdvice.basis !== undefined && typeof actionAdvice.basis !== 'string') {
+    return {
+      valid: false,
+      error: `${errorPrefix}.actionAdvice.basis 必须是字符串`,
+    };
+  }
+
+  // 验证 scenario（可选，但若有则必须是字符串）
+  if (actionAdvice.scenario !== undefined && typeof actionAdvice.scenario !== 'string') {
+    return {
+      valid: false,
+      error: `${errorPrefix}.actionAdvice.scenario 必须是字符串`,
     };
   }
 
@@ -277,6 +343,12 @@ export function validateChartData(data: unknown): {
     const energyValidation = validateEnergyScore(point.energyScore, errorPrefix);
     if (!energyValidation.valid) {
       return energyValidation;
+    }
+
+    // 验证行动建议（可选字段）
+    const actionAdviceValidation = validateActionAdvice(point.actionAdvice, errorPrefix);
+    if (!actionAdviceValidation.valid) {
+      return actionAdviceValidation;
     }
   }
 

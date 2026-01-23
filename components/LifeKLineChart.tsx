@@ -13,6 +13,7 @@ import {
   Label,
   LabelList
 } from 'recharts';
+import { Target, Lightbulb, AlertTriangle } from 'lucide-react';
 import { KLinePoint, InterpolatedKLinePoint, SupportPressureLevel } from '@/types';
 
 interface LifeKLineChartProps {
@@ -120,6 +121,59 @@ const CustomTooltip = ({ active, payload }: any) => {
         <div className="text-sm text-gray-700 leading-relaxed text-justify max-h-[200px] overflow-y-auto custom-scrollbar">
           {data.reason}
         </div>
+
+        {/* 行动指南 */}
+        {data.actionAdvice && (
+          <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-bold text-indigo-900 flex items-center gap-1">
+                <Target className="w-4 h-4" />
+                行动指南
+              </h4>
+              {data.actionAdvice.scenario && (
+                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
+                  {data.actionAdvice.scenario}
+                </span>
+              )}
+            </div>
+
+            {/* 建议行动 */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-green-800 mb-1 flex items-center gap-1">
+                <Lightbulb className="w-3.5 h-3.5" />
+                建议行动
+              </p>
+              {data.actionAdvice.suggestions.map((suggestion, idx) => (
+                <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                  <span className="text-green-600 font-bold mt-0.5">{idx + 1}.</span>
+                  <span className="flex-1">{suggestion}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* 规避提醒 */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-red-800 mb-1 flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                规避提醒
+              </p>
+              {data.actionAdvice.warnings.map((warning, idx) => (
+                <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                  <span className="text-red-600 font-bold mt-0.5">•</span>
+                  <span className="flex-1">{warning}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* 玄学依据 */}
+            {data.actionAdvice.basis && (
+              <div className="text-xs text-purple-700 bg-purple-50 p-2 rounded border border-purple-200">
+                <span className="font-semibold">玄学依据：</span>
+                {data.actionAdvice.basis}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }

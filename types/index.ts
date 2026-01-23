@@ -43,6 +43,14 @@ export interface SupportPressureLevel {
   tenGod?: TenGod;          // 关联的十神
 }
 
+// 行动建议数据结构（运势 + 行动清单深度绑定）
+export interface ActionAdvice {
+  suggestions: string[];    // 3条精准行动建议（基于五行旺衰、十神状态）
+  warnings: string[];       // 2条规避提醒（避免冲突、减少风险）
+  basis?: string;           // 玄学依据说明（如"木旺主生发，利学习输出"）
+  scenario?: string;        // 适用场景（创业者/职场人/备考者/投资者）
+}
+
 export interface KLinePoint {
   age: number;
   year: number;
@@ -56,6 +64,7 @@ export interface KLinePoint {
   reason: string; // 详细的流年描述 (20-30字)
   tenGod?: TenGod;          // 主要十神
   energyScore?: EnergyScore; // 能量分数（可选）
+  actionAdvice?: ActionAdvice;  // 行动建议（仅关键年份有值）
 }
 
 export interface AnalysisData {
@@ -129,6 +138,7 @@ export interface RawKLinePoint {
   reason: string;
   tenGod?: TenGod;          // 主要十神
   energyScore?: EnergyScore; // 能量分数（可选）
+  actionAdvice?: ActionAdvice;  // 行动建议（仅关键年份有值）
 }
 
 // AI 返回的原始分析数据（所有 score 字段可能是 0-100 范围）

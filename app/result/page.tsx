@@ -8,6 +8,7 @@ import { getDailyViewRange, getWeeklyViewRange, calculateVirtualAge } from '@/li
 import { interpolateDailyData } from '@/lib/interpolation';
 import LifeKLineChart from '@/components/LifeKLineChart';
 import AnalysisResult from '@/components/AnalysisResult';
+import ActionAdvicePanel from '@/components/ActionAdvicePanel';
 import RiskWarningBanner from '@/components/RiskWarningBanner';
 import ViewSwitcher, { ViewMode } from '@/components/ViewSwitcher';
 import Button from '@/components/shared/Button';
@@ -125,6 +126,50 @@ export default function ResultPage() {
       `
       : '';
 
+    // 生成行动指南表格（如果有）
+    const actionAdviceTable = result.chartData.some(p => p.actionAdvice)
+      ? `
+  <div class="section">
+    <h2>关键年份行动指南</h2>
+    ${result.chartData
+      .filter(p => p.actionAdvice)
+      .map(point => `
+        <div style="margin-bottom: 20px; padding: 15px; border-left: 4px solid #4f46e5; background: #f9fafb;">
+          <h3 style="margin: 0 0 10px 0; color: #1f2937;">
+            ${point.age}岁 (${point.year}年) - ${point.ganZhi}
+            ${point.tenGod ? `[${point.tenGod}]` : ''}
+            ${point.actionAdvice?.scenario ? `<span style="font-size: 12px; background: #dbeafe; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">${point.actionAdvice.scenario}</span>` : ''}
+          </h3>
+
+          <div style="margin-bottom: 10px;">
+            <strong style="color: #059669;">✅ 建议行动：</strong>
+            <ol style="margin: 5px 0; padding-left: 20px;">
+              ${point.actionAdvice!.suggestions.map(s => `<li>${s}</li>`).join('')}
+            </ol>
+          </div>
+
+          <div style="margin-bottom: 10px;">
+            <strong style="color: #dc2626;">⚠️ 规避提醒：</strong>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+              ${point.actionAdvice!.warnings.map(w => `<li>${w}</li>`).join('')}
+            </ul>
+          </div>
+
+          ${point.actionAdvice!.basis ? `
+            <div style="background: #faf5ff; padding: 10px; margin-top: 10px; border-radius: 4px; font-size: 14px; color: #7c3aed;">
+              <strong>玄学依据：</strong>${point.actionAdvice!.basis}
+            </div>
+          ` : ''}
+
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb; font-size: 13px; color: #6b7280;">
+            ${point.reason}
+          </div>
+        </div>
+      `).join('')}
+  </div>
+      `
+      : '';
+
     // 生成简单的 HTML 内容
     const htmlContent = `
 <!DOCTYPE html>
@@ -186,6 +231,8 @@ export default function ResultPage() {
   </div>
 
   ${spLevelsTable}
+
+  ${actionAdviceTable}
 
   <div class="section">
     <h2>流年详批（1-100岁）</h2>
@@ -338,7 +385,14 @@ export default function ResultPage() {
 
         {/* 命理分析面板（仅在年视图显示） */}
         {viewMode === 'year' && (
-          <AnalysisResult analysis={result.analysis} />
+          <>
+            <AnalysisResult analysis={result.analysis} />
+
+            {/* 行动指南面板 */}
+            <div className="mt-8">
+              <ActionAdvicePanel data={chartData} viewMode={viewMode} />
+            </div>
+          </>
         )}
 
         {/* 免责声明 */}
