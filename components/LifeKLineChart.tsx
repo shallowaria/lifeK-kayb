@@ -23,7 +23,16 @@ interface LifeKLineChartProps {
   supportPressureLevels?: SupportPressureLevel[];  // 支撑/压力位列表
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: KLinePoint | InterpolatedKLinePoint;
+    [key: string]: unknown;
+  }>;
+  label?: string | number;
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload as KLinePoint | InterpolatedKLinePoint;
     const isUp = data.close >= data.open;
@@ -82,7 +91,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 
         {/* 新增：能量分数显示 */}
         {data.energyScore && (
-          <div className="mt-3 mb-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+          <div className="mt-3 mb-3 p-3 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-bold text-blue-900">能量分数</span>
               <span className={`text-lg font-bold ${
@@ -200,7 +209,6 @@ const CandleShape = (props: CandleShapeProps): React.ReactElement | null => {
 
   const center = x + width / 2;
   const renderHeight = height < 2 ? 2 : height;
-  const halfWidth = width / 2;
   const middleY = y + renderHeight / 2;
 
   return (
@@ -319,13 +327,13 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
   // 支撑线 S：在最低点下方
   const supportLineValue = minLow * 1.05;
   // 压力线 R：在最高点上方
-  const pressureLineValue = maxHigh * 0.96;
+  const pressureLineValue = maxHigh * 0.93;
 
   // 计算今年对应的位置（用于标注今年的竖线）
   const currentYear = new Date().getFullYear();
   const currentYearDataPoint = data.find(d => d.year === currentYear);
-  const currentYearPosition = currentYearDataPoint
-    ? (viewMode === 'year' ? currentYearDataPoint.age : ('date' in currentYearDataPoint ? currentYearDataPoint.date : currentYearDataPoint.age))
+  const currentYearPosition: string | number | null = currentYearDataPoint
+    ? (viewMode === 'year' ? currentYearDataPoint.age : ('date' in currentYearDataPoint ? (currentYearDataPoint as InterpolatedKLinePoint).date : currentYearDataPoint.age))
     : null;
 
   // 根据视图模式筛选适用的支撑压力位（保留原有逻辑用于其他用途）
@@ -420,7 +428,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
       <ResponsiveContainer width="100%" height="90%">
         <ComposedChart data={transformedData} margin={{ top: 30, right: 10, left: 0, bottom: 20 }}>
           {/* No CartesianGrid - removed for Chinese painting aesthetic */}
-
+    <>
           <XAxis
             dataKey={xAxisConfig.dataKey}
             tick={{fontSize: 10, fill: '#6b7280', fontFamily: 'KaiTi, serif'}}
@@ -563,6 +571,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
             <LabelList
               dataKey="high"
               position="top"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               content={(props: any) => <SealStampLabel {...props} maxHigh={maxHigh} />}
             />
           </Bar>
@@ -577,7 +586,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
             isAnimationActive={true}
             animationDuration={1500}
           />
-
+      </>
         </ComposedChart>
       </ResponsiveContainer>
     </div>
