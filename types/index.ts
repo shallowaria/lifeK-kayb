@@ -179,3 +179,24 @@ export type RawAIResponse =
       chartPoints?: RawKLinePoint[];
       chartData?: RawKLinePoint[];
     } & RawAnalysisData);
+
+// Custom chart component props
+export interface CandleShapeProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  payload?: KLinePoint;
+  yAxis?: {
+    scale: (value: number) => number;
+  };
+}
+
+export interface SealStampLabelProps {
+  x: number;
+  y: number;
+  width: number;
+  value: number;
+  maxHigh: number;
+}
+

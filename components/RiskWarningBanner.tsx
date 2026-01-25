@@ -54,10 +54,10 @@ const RiskWarningBanner: React.FC<RiskWarningBannerProps> = ({ data, viewMode })
           <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <h3 className="text-lg font-bold text-red-900 mb-1">
-              ⚠️ 能量失守警告
+              ⚠️ {lowestEnergyPoint.age}岁能量失守警告
             </h3>
             <p className="text-sm text-red-800 mb-2">
-              检测到运势能量极低，建议保持防守姿态，不宜做重大决策，注意情绪止损。
+              检测到这一岁运势能量极低，建议保持防守姿态，不宜做重大决策，注意情绪止损。
             </p>
             <div className="bg-white/80 rounded px-3 py-2 text-sm">
               <div className="flex items-center space-x-4 flex-wrap gap-2">

@@ -289,7 +289,7 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-red-50 to-orange-50 py-8 px-4">
+    <div className="min-h-screen paper-texture py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* 标题和操作栏 */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 no-print">

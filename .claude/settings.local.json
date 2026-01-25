@@ -1,5 +1,8 @@
 {
   "permissions": {
-    "deny": []
+    "deny": [],
+    "allow": [
+      "Bash(pnpm run build)"
+    ]
   }
 }

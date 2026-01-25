@@ -4,9 +4,9 @@ import React from 'react';
 import {
   ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
@@ -14,7 +14,7 @@ import {
   LabelList
 } from 'recharts';
 import { Target, Lightbulb, AlertTriangle } from 'lucide-react';
-import { KLinePoint, InterpolatedKLinePoint, SupportPressureLevel } from '@/types';
+import { KLinePoint, InterpolatedKLinePoint, SupportPressureLevel, CandleShapeProps, SealStampLabelProps } from '@/types';
 
 interface LifeKLineChartProps {
   data: KLinePoint[] | InterpolatedKLinePoint[];
@@ -180,76 +180,100 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-// CandleShape with cleaner wicks
-const CandleShape = (props: any) => {
+// CandleShape with Chinese painting colors - diamond shape
+const CandleShape = (props: CandleShapeProps): React.ReactElement | null => {
   const { x, y, width, height, payload, yAxis } = props;
 
+  if (!payload) return null;
+
   const isUp = payload.close >= payload.open;
-  const color = isUp ? '#22c55e' : '#ef4444'; // Green Up, Red Down
-  const strokeColor = isUp ? '#15803d' : '#b91c1c'; // Darker stroke for better visibility
+  const color = isUp ? '#B22D1B' : '#2F4F4F'; // Cinnabar red / Indigo
+  const strokeColor = isUp ? '#8B1810' : '#1F3A3A';
 
   let highY = y;
   let lowY = y + height;
 
   if (yAxis && typeof yAxis.scale === 'function') {
-    try {
       highY = yAxis.scale(payload.high);
       lowY = yAxis.scale(payload.low);
-    } catch (e) {
-      highY = y;
-      lowY = y + height;
-    }
   }
 
   const center = x + width / 2;
-
-  // Enforce minimum body height so flat doji candles are visible
   const renderHeight = height < 2 ? 2 : height;
+  const halfWidth = width / 2;
+  const middleY = y + renderHeight / 2;
 
   return (
     <g>
-      {/* Wick - made slightly thicker for visibility */}
-      <line x1={center} y1={highY} x2={center} y2={lowY} stroke={strokeColor} strokeWidth={2} />
-      {/* Body */}
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={renderHeight}
+      {/* Wick with brush stroke effect */}
+      <line
+        x1={center} y1={highY} x2={center} y2={lowY}
+        stroke={strokeColor}
+        strokeWidth={1.5}
+        opacity={0.8}
+      />
+
+      {/* Diamond body shape (four points: top, right, bottom, left) */}
+      <polygon
+        points={`
+          ${center},${y}
+          ${x + width},${middleY}
+          ${center},${y + renderHeight}
+          ${x},${middleY}
+        `}
         fill={color}
         stroke={strokeColor}
         strokeWidth={1}
-        rx={1} // Slight border radius
+        opacity={0.85}
       />
     </g>
   );
 };
 
-// Custom Label Component for the Peak Star
-const PeakLabel = (props: any) => {
+// Custom Seal Stamp Label Component for the Peak
+const SealStampLabel = (props: SealStampLabelProps): React.ReactElement | null => {
   const { x, y, width, value, maxHigh } = props;
 
-  // Only render if this value equals the global max high
   if (value !== maxHigh) return null;
 
   return (
     <g>
-      {/* Red Star Icon */}
-      <path
-        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-        transform={`translate(${x + width / 2 - 6}, ${y - 24}) scale(0.5)`}
-        fill="#ef4444" // Red-500
-        stroke="#b91c1c" // Red-700
-        strokeWidth="1"
+      {/* Cinnabar seal stamp */}
+      <rect
+        x={x + width / 2 - 15}
+        y={y - 35}
+        width={30}
+        height={30}
+        fill="#B22D1B"
+        stroke="#8B1810"
+        strokeWidth={2}
+        rx={3}
+        ry={3}
+        opacity={0.9}
       />
-      {/* Score Text */}
+
+      {/* Inner white border */}
+      <rect
+        x={x + width / 2 - 13}
+        y={y - 33}
+        width={26}
+        height={26}
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth={1}
+        rx={2}
+        ry={2}
+      />
+
+      {/* White reversed score */}
       <text
         x={x + width / 2}
-        y={y - 28}
-        fill="#b91c1c"
-        fontSize={10}
+        y={y - 15}
+        fill="#FFFFFF"
+        fontSize={11}
         fontWeight="bold"
         textAnchor="middle"
+        fontFamily="KaiTi, serif"
       >
         {value}
       </text>
@@ -257,12 +281,26 @@ const PeakLabel = (props: any) => {
   );
 };
 
+
 const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year', title, supportPressureLevels = [] }) => {
-  const transformedData = data.map(d => ({
+  // 计算MK10（10期移动平均线）
+  const calculateMK10 = (data: (KLinePoint | InterpolatedKLinePoint)[]): number[] => {
+    return data.map((_, index) => {
+      const start = Math.max(0, index - 9);
+      const window = data.slice(start, index + 1);
+      const avgClose = window.reduce((sum, d) => sum + d.close, 0) / window.length;
+      return avgClose;
+    });
+  };
+
+  const mk10Values = calculateMK10(data);
+
+  const transformedData = data.map((d, index) => ({
     ...d,
     bodyRange: [Math.min(d.open, d.close), Math.max(d.open, d.close)],
     // Helper for labelling: we label the 'high' point
-    labelPoint: d.high
+    labelPoint: d.high,
+    mk10: mk10Values[index]
   }));
 
   // Identify Da Yun change points to draw reference lines
@@ -274,14 +312,46 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
   // Calculate Global Max High for the peak label
   const maxHigh = data.length > 0 ? Math.max(...data.map(d => d.high)) : 100;
 
-  // 根据视图模式筛选适用的支撑压力位
+  // Calculate Global Min Low for pressure line validation
+  const minLow = data.length > 0 ? Math.min(...data.map(d => d.low)) : 0;
+
+  // 计算支撑线和压力线的位置（自动基于全局最高最低值）
+  // 支撑线 S：在最低点下方
+  const supportLineValue = minLow * 1.05;
+  // 压力线 R：在最高点上方
+  const pressureLineValue = maxHigh * 0.96;
+
+  // 计算今年对应的位置（用于标注今年的竖线）
+  const currentYear = new Date().getFullYear();
+  const currentYearDataPoint = data.find(d => d.year === currentYear);
+  const currentYearPosition = currentYearDataPoint
+    ? (viewMode === 'year' ? currentYearDataPoint.age : ('date' in currentYearDataPoint ? currentYearDataPoint.date : currentYearDataPoint.age))
+    : null;
+
+  // 根据视图模式筛选适用的支撑压力位（保留原有逻辑用于其他用途）
   const visibleLevels = React.useMemo(() => {
     if (!supportPressureLevels || supportPressureLevels.length === 0) return [];
 
-    // 在所有视图模式下都显示基于 age 的支撑压力位
-    // 简化处理：直接显示所有支撑压力位
-    return supportPressureLevels;
-  }, [supportPressureLevels, viewMode]);
+    // 分离支撑位和压力位
+    const support = supportPressureLevels.filter(l => l.type === 'support');
+    const pressure = supportPressureLevels.filter(l => l.type === 'pressure');
+
+    // 支撑线：显示最高的支撑位（K线下方，低于最低点）
+    const validSupport = support.filter(l => l.value * 10 <= minLow); // 支撑位应该在K线下方
+    const maxSupport = validSupport.length > 0 ? validSupport.reduce((max, l) => l.value > max.value ? l : max) : null;
+
+    // 压力线：显示最低的压力位，且必须高于所有K线的最高点
+    // 从所有压力位中筛选出高于maxHigh的，然后选最高的那个
+    const validPressure = pressure.filter(l => l.value * 10 >= maxHigh); // 压力位应该在K线上方
+    const minPressure = validPressure.length > 0
+      ? validPressure.reduce((min, l) => l.value < min.value ? l : min)
+      : null;
+
+    return [
+      ...(maxSupport ? [maxSupport] : []),
+      ...(minPressure ? [minPressure] : [])
+    ];
+  }, [supportPressureLevels, minLow, maxHigh]);
 
   // 分离支撑位和压力位
   const supportLevels = visibleLevels.filter(l => l.type === 'support');
@@ -327,26 +397,37 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
   }
 
   return (
-    <div className="w-full h-[600px] bg-white p-2 md:p-6 rounded-xl border border-gray-200 shadow-sm relative">
+    <div className="w-full h-[600px] paper-texture p-2 md:p-6 rounded-xl border border-gray-200 shadow-sm relative">
       <div className="mb-6 flex justify-between items-center px-2">
         <h3 className="text-xl font-bold text-gray-800">{title || '人生流年大运K线图'}</h3>
         <div className="flex gap-4 text-xs font-medium">
-           <span className="flex items-center text-green-700 bg-green-50 px-2 py-1 rounded"><div className="w-2 h-2 bg-green-500 mr-2 rounded-full"></div> 吉运 (涨)</span>
-           <span className="flex items-center text-red-700 bg-red-50 px-2 py-1 rounded"><div className="w-2 h-2 bg-red-500 mr-2 rounded-full"></div> 凶运 (跌)</span>
+          <span className="flex items-center text-red-900 bg-red-50 px-2 py-1 rounded">
+            <div className="w-2 h-2 bg-cinnabarred mr-2 rounded-full"></div> 吉运
+          </span>
+          <span className="flex items-center text-indigo-900 bg-indigo-50 px-2 py-1 rounded">
+            <div className="w-2 h-2 bg-indigo mr-2 rounded-full"></div> 凶运
+          </span>
+          <span className="flex items-center text-indigo-700 bg-indigo-100 px-2 py-1 rounded">
+            <div className="w-5 h-0 border-t-2 border-amber-600 border-dashed mr-2"></div> 支撑/压力
+          </span>
+          <span className="flex items-center text-indigo-700 bg-indigo-200 px-2 py-1 rounded">
+            <div className="w-2 h-2 bg-green-500 mr-2 rounded-full"></div> MK10
+          </span>
+          
         </div>
       </div>
 
       <ResponsiveContainer width="100%" height="90%">
         <ComposedChart data={transformedData} margin={{ top: 30, right: 10, left: 0, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+          {/* No CartesianGrid - removed for Chinese painting aesthetic */}
 
           <XAxis
             dataKey={xAxisConfig.dataKey}
-            tick={{fontSize: 10, fill: '#6b7280'}}
+            tick={{fontSize: 10, fill: '#6b7280', fontFamily: 'KaiTi, serif'}}
             interval={xAxisConfig.interval}
-            axisLine={{ stroke: '#e5e7eb' }}
+            axisLine={{ stroke: '#D1CDC2', strokeWidth: 1 }}
             tickLine={false}
-            label={xAxisConfig.label}
+            height={30}
             tickFormatter={xAxisConfig.tickFormatter}
           />
 
@@ -362,78 +443,140 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
 
           {/* Da Yun Reference Lines */}
           {daYunChanges.map((point, index) => (
-             <ReferenceLine
-               key={`dayun-${index}`}
-               x={point.age}
-               stroke="#cbd5e1"
-               strokeDasharray="3 3"
-               strokeWidth={1}
-             >
-               <Label
-                 value={point.daYun}
-                 position="top"
-                 fill="#6366f1"
-                 fontSize={10}
-                 fontWeight="bold"
-                 className="hidden md:block"
-               />
-             </ReferenceLine>
+            <ReferenceLine
+              key={`dayun-${index}`}
+              x={point.age}
+              stroke="#cbd5e1"
+              strokeDasharray="3 3"
+              strokeWidth={1}
+            >
+              <Label
+                value={point.daYun}
+                position="top"
+                fill="#6366f1"
+                fontSize={10}
+                fontWeight="bold"
+                className="hidden md:block"
+              />
+            </ReferenceLine>
           ))}
 
-          {/* 新增：支撑位参考线（绿色虚线）*/}
+          {/* 全局支撑线 S - 穿过整个图表 */}
+          <ReferenceLine
+            y={supportLineValue}
+            stroke="#2F4F4F"
+            strokeWidth={2}
+            strokeDasharray="5 5"
+            opacity={0.6}
+            label={{
+              value: 'S',
+              position: 'insideLeft',
+              fill: '#2F4F4F',
+              fontSize: 14,
+              fontWeight: 'bold',
+              offset: -8
+            }}
+          />
+
+          {/* 全局压力线 R - 穿过整个图表 */}
+          <ReferenceLine
+            y={pressureLineValue}
+            stroke="#B22D1B"
+            strokeWidth={2}
+            strokeDasharray="5 5"
+            opacity={0.6}
+            label={{
+              value: 'R',
+              position: 'insideRight',
+              fill: '#B22D1B',
+              fontSize: 14,
+              fontWeight: 'bold',
+              offset: -8
+            }}
+          />
+
+          {/* Support lines - subtle solid gold */}
           {supportLevels.map((level, idx) => (
             <ReferenceLine
               key={`support-${idx}`}
               y={level.value * 10}
-              stroke="#22c55e"
-              strokeDasharray="5 5"
-              strokeWidth={2}
-              opacity={0.7}
+              stroke="#C5A367"
+              strokeWidth={1.5}
+              strokeDasharray="none"
+              opacity={0.5}
               label={{
-                value: `支撑 ${level.value}分: ${level.reason}`,
-                position: 'insideTopLeft',
-                fill: '#15803d',
-                fontSize: 10,
-                fontWeight: 'bold'
+                value: `财`,
+                position: 'insideLeft',
+                fill: '#C5A367',
+                fontSize: 12,
+                fontWeight: 'bold',
+                fontFamily: 'KaiTi, serif'
               }}
             />
           ))}
 
-          {/* 新增：压力位参考线（红色虚线）*/}
+          {/* Pressure lines - subtle solid gray */}
           {pressureLevels.map((level, idx) => (
             <ReferenceLine
               key={`pressure-${idx}`}
               y={level.value * 10}
-              stroke="#ef4444"
-              strokeDasharray="5 5"
-              strokeWidth={2}
-              opacity={0.7}
+              stroke="#8B8680"
+              strokeWidth={1.5}
+              strokeDasharray="none"
+              opacity={0.5}
               label={{
-                value: `压力 ${level.value}分: ${level.reason}`,
-                position: 'insideBottomLeft',
-                fill: '#b91c1c',
-                fontSize: 10,
-                fontWeight: 'bold'
+                value: `印`,
+                position: 'insideRight',
+                fill: '#8B8680',
+                fontSize: 12,
+                fontWeight: 'bold',
+                fontFamily: 'KaiTi, serif'
               }}
             />
           ))}
 
+          {/* 今年的竖线标注 */}
+          {currentYearPosition && (
+            <ReferenceLine
+              x={currentYearPosition}
+              stroke="#FFA500"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              opacity={0.7}
+              label={{
+                value: `今年 ${currentYear}`,
+                position: 'top',
+                fill: '#FFA500',
+                fontSize: 12,
+                fontWeight: 'bold',
+                offset: 10
+              }}
+            />
+          )}
+
           <Bar
             dataKey="bodyRange"
-            shape={<CandleShape />}
+            shape={CandleShape}
             isAnimationActive={true}
             animationDuration={1500}
           >
-            {/*
-              Only show label for the global Peak
-              We pass the computed maxHigh to the custom label component
-            */}
-             <LabelList
+            <LabelList
               dataKey="high"
               position="top"
-              content={<PeakLabel maxHigh={maxHigh} />}
+              content={(props: any) => <SealStampLabel {...props} maxHigh={maxHigh} />}
             />
           </Bar>
+
+          {/* MK10 移动平均线 */}
+          <Line
+            type="monotone"
+            dataKey="mk10"
+            stroke="#479977"
+            strokeWidth={2}
+            dot={false}
+            isAnimationActive={true}
+            animationDuration={1500}
+          />
 
         </ComposedChart>
       </ResponsiveContainer>

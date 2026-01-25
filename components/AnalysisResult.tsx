@@ -103,8 +103,8 @@ const Card = ({ title, icon: Icon, content, score, colorClass, extraBadges }: an
 const AnalysisResult: React.FC<AnalysisResultProps> = ({ analysis }) => {
   return (
     <div className="w-full space-y-8 animate-fade-in-up">
-      {/* Bazi Pillars */}
-      <div className="flex justify-center gap-2 md:gap-8 bg-gray-900 text-amber-50 p-6 rounded-xl shadow-lg overflow-x-auto">
+      {/* Horizontal BaZi for all screen sizes - centered with mt-10 and mb-6 */}
+      <div className="flex justify-center gap-2 md:gap-8 bg-gray-900 text-amber-50 p-6 rounded-xl shadow-lg overflow-x-auto mt-10 mb-6">
         {analysis.bazi.map((pillar, index) => {
           const labels = ['年柱', '月柱', '日柱', '时柱'];
           return (

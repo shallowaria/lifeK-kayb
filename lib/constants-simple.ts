@@ -3,9 +3,14 @@ export const BAZI_SYSTEM_INSTRUCTION = `
 
 **核心规则:**
 1. **年龄计算**: 采用虚岁,从 1 岁开始,只生成到 30 岁。
-2. **K线详批**: 每年的 \`reason\` 字段必须**控制在10-15字以内**,简洁描述吉凶趋势即可。
-3. **评分机制**: 所有维度给出 0-10 分。
-4. **数据起伏**: 让评分呈现明显波动,体现"牛市"和"熊市"区别,禁止输出平滑直线。
+2. **年份计算**: year 字段必须从用户出生年份开始计算。例如用户出生年份是1995年，则：
+   - age 1 → year 1995 (出生年份)
+   - age 2 → year 1996 (出生年份 + 1)
+   - age 30 → year 2024 (出生年份 + 29)
+   公式: year = 出生年份 + (age - 1)
+3. **K线详批**: 每年的 \`reason\` 字段必须**控制在10-15字以内**,简洁描述吉凶趋势即可。
+4. **评分机制**: 所有维度给出 0-10 分。
+5. **数据起伏**: 让评分呈现明显波动,体现"牛市"和"熊市"区别,禁止输出平滑直线。
 
 **大运规则:**
 - 顺行: 甲子 -> 乙丑 -> 丙寅...
@@ -106,7 +111,7 @@ export const BAZI_SYSTEM_INSTRUCTION = `
         "scenario": "备考者"
       }
     }
-    ... (共30条，age 1-30，只为 supportPressureLevels 中的年份生成 actionAdvice)
+    ... (共30条，age 1-30，year从用户出生年份开始递增，只为 supportPressureLevels 中的年份生成 actionAdvice)
   ],
   "supportPressureLevels": [
     {
@@ -147,12 +152,13 @@ export const BAZI_SYSTEM_INSTRUCTION = `
 
 **重要提示:**
 1. 必须输出完整的 30 个 chartPoints（age 1-30）
-2. 必须生成 supportPressureLevels（3-5个关键位）
-3. reason 字段 10-15字
-4. 只为关键年份生成 actionAdvice，其他设为 null
-5. 直接输出纯JSON，不要添加 \`\`\`json 等markdown标记
-6. 确保 high >= max(open, close) 且 low <= min(open, close)
-7. score 和 energyScore.total 使用 0-10 分制（可有小数）
+2. **year字段必须从用户出生年份开始计算**，例如用户出生1995年，则age 1对应year 1995，age 30对应year 2024
+3. 必须生成 supportPressureLevels（3-5个关键位）
+4. reason 字段 10-15字
+5. 只为关键年份生成 actionAdvice，其他设为 null
+6. 直接输出纯JSON，不要添加 \`\`\`json 等markdown标记
+7. 确保 high >= max(open, close) 且 low <= min(open, close)
+8. score 和 energyScore.total 使用 0-10 分制（可有小数）
 `;
 
 export const SHI_CHEN_LIST = [

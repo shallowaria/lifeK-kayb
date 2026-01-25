@@ -10,6 +10,14 @@
   --color-foreground: var(--foreground);
 }
 
+@theme {
+  --color-beige: #F2EFE6;
+  --color-lightink: #D1CDC2;
+  --color-cinnabarred: #B22D1B;
+  --color-indigo: #2F4F4F;
+}
+
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -52,6 +60,44 @@ body {
   animation: fade-in-up 0.6s ease-out;
 }
 
+/* Paper texture and Chinese painting styles */
+@layer utilities {
+  .paper-texture {
+    background-color: #F2EFE6;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.93 0 0 0 0 0.9 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-blend-mode: multiply;
+  }
+}
+
+.vertical-bazi-panel {
+  @apply flex flex-col justify-center items-center py-8;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+.bazi-border {
+  @apply bg-beige p-4;
+  border: 3px solid var(--color-lightink);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 0 1px var(--color-lightink),
+    inset 0 0 0 5px #F2EFE6;
+}
+
+.bazi-char {
+  @apply text-2xl font-bold my-1;
+  font-family: KaiTi, STKaiti, serif;
+  letter-spacing: 0.2em;
+  color: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .vertical-bazi-panel {
+    display: none;
+  }
+}
+
 /* 打印样式 */
 @media print {
   .no-print {
@@ -77,5 +123,13 @@ body {
   /* 打印时显示详批表格 */
   .print-only {
     display: block !important;
+  }
+
+  /* Disable filters for print */
+  [filter] {
+    filter: none !important;
+  }
+  .paper-texture {
+    background-image: none;
   }
 }
