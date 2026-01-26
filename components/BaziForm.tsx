@@ -13,19 +13,14 @@ interface BaziFormProps {
 }
 
 export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
-  // 用户输入的原始数据
   const [name, setName] = useState(initialData?.name || '');
   const [gender, setGender] = useState<Gender>(initialData?.gender || 'Male');
-  const [birthDate, setBirthDate] = useState(''); // YYYY-MM-DD 格式
+  const [birthDate, setBirthDate] = useState(''); 
   const [shiChen, setShiChen] = useState<ShiChenName>('子时');
-
-  // 计算结果（自动填充）
   const [calculatedData, setCalculatedData] = useState<UserInput | null>(null);
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState<string>('');
 
-
-  // 当日期、时辰或性别变化时，自动计算八字
   useEffect(() => {
     if (birthDate && shiChen && gender) {
       handleCalculate();
@@ -35,47 +30,37 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
   const handleCalculate = () => {
     setError('');
     setCalculating(true);
-
     try {
-      // 解析日期字符串
       const dateObj = new Date(birthDate);
-
-      // 验证输入
       const validation = validateBaziCalculationInput({
         birthDate: dateObj,
         shiChen,
         gender,
       });
-
       if (!validation.valid) {
         setError(validation.error || '输入信息无效');
         setCalculatedData(null);
         return;
       }
-
-      // 计算八字
       const result = calculateBazi({
         birthDate: dateObj,
         shiChen,
         gender,
       });
-
-      // 填充到 UserInput 格式
       const userData: UserInput = {
         name,
         gender,
         birthYear: result.birthYear,
-        birthDate: birthDate,  // 保存完整日期 (YYYY-MM-DD)
+        birthDate: birthDate, 
         yearPillar: result.yearPillar,
         monthPillar: result.monthPillar,
         dayPillar: result.dayPillar,
         hourPillar: result.hourPillar,
         startAge: result.startAge,
       };
-
       setCalculatedData(userData);
     } catch (err: unknown) {
-      setError('计算失败，请检查输入信息');
+      setError(`计算失败，请检查输入信息${err}`);
       setCalculatedData(null);
     } finally {
       setCalculating(false);
@@ -84,193 +69,272 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!calculatedData) {
       setError('请先填写出生日期和时辰');
       return;
     }
-
-    // 提交并自动生成
     onSubmit(calculatedData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          输入您的出生信息
-        </h2>
-        <p className="text-gray-600">
-          填写出生日期和时辰，系统将自动计算八字并生成运势分析
-        </p>
-      </div>
+    <>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
+        
+        .font-song { font-family: 'Noto Serif SC', serif; }
+        .font-calligraphy { font-family: 'Ma Shan Zheng', cursive; }
+        
+        .bg-rice-paper {
+          background-color: #fdfbf7;
+          background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d1cbb8' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
 
-      {/* 姓名（可选） */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          姓名（可选）
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="凯布"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-        />
-      </div>
+        /* * 修复核心：日期输入框样式穿透 
+         */
+        
+        /* 1. 确保 wrapper 占满宽度 */
+        .custom-date-input-wrapper {
+          width: 100%;
+        }
 
-      {/* 性别 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          性别 <span className="text-red-600">*</span>
-        </label>
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={() => setGender('Male')}
-            className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${gender === 'Male'
-              ? 'border-red-600 bg-red-50 text-red-600 font-semibold'
-              : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-              }`}
-          >
-            乾造（男）
-          </button>
-          <button
-            type="button"
-            onClick={() => setGender('Female')}
-            className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${gender === 'Female'
-              ? 'border-red-600 bg-red-50 text-red-600 font-semibold'
-              : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-              }`}
-          >
-            坤造（女）
-          </button>
-        </div>
-      </div>
+        /* 2. 强制内部 flex 容器布局 */
+        .custom-date-input-wrapper > div {
+          display: flex !important;
+          flex-direction: row !important;
+          width: 100% !important;
+          gap: 1.5rem !important; /* 保持间距，但稍微收一点点防止手机端换行 */
+          justify-content: space-between !important;
+        }
+        
+        /* 3. 核心修复：强制 Input 撑开宽度，避免塌陷 */
+        .custom-date-input-wrapper input, 
+        .custom-date-input-wrapper select {
+          display: block !important;
+          flex: 1 1 auto !important;
+          min-width: 60px !important;
+          width: auto !important;
+          max-width: 60px !important;
+          
+          background-color: transparent !important;
+          border: none !important;
+          border-bottom: 2px solid #8b7e66 !important;
+          border-radius: 0 !important;
+           padding: 0.5rem 0.2rem !important; /* 稍微减小左右 padding，留给文字更多空间 */
+          
+          font-family: 'Noto Serif SC', serif !important;
+          font-size: 1.25rem !important;
+          text-align: center !important;
+          box-shadow: none !important;
+          color: #2c1810 !important;
+        }
 
-      {/* 出生日期 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor='birthDate'>
-          出生日期（公历） <span className="text-red-600">*</span>
-        </label>
-        <SegmentedDateInput 
-          value={birthDate} 
-          onChange={setBirthDate} 
-          minYear={1900} 
-          maxYear={2100}
-        />
-        <p className="text-xs text-gray-500 mt-1">请选择公历（阳历）日期</p>
-      </div>
+        /* 隐藏掉可能的默认箭头或图标，保持清爽 */
+        .custom-date-input-wrapper input::-webkit-calendar-picker-indicator {
+          opacity: 0.5;
+           filter: sepia(100%) hue-rotate(-50deg) saturate(600%); /* 尝试将图标染成古铜色 */
+        }
 
-      {/* 出生时辰 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          出生时辰 <span className="text-red-600">*</span>
-        </label>
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-          {SHI_CHEN_LIST.map((sc) => (
-            <button
-              key={sc.name}
-              type="button"
-              onClick={() => setShiChen(sc.name as ShiChenName)}
-              className={`py-2 px-3 rounded-lg border-2 transition-colors text-sm ${shiChen === sc.name
-                ? 'border-red-600 bg-red-50 text-red-600 font-semibold'
-                : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                }`}
+        .custom-date-input-wrapper input:focus,
+        .custom-date-input-wrapper select:focus {
+          border-bottom-color: #b22222 !important;
+          outline: none !important;
+        }
+      `}</style>
+
+      {/* 主容器 */}
+      <div className="relative font-song bg-rice-paper p-6 md:p-12 lg:p-16 rounded-xl shadow-2xl border-[6px] border-double border-[#8b7e66] mx-auto max-w-5xl">
+        
+        <div className="absolute top-0 left-0 w-full h-4 bg-linear-to-b from-[#8b7e66]/10 to-transparent"></div>
+
+        <form onSubmit={handleSubmit} className="relative z-10 space-y-12"> 
+
+          {/* 标题 */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-[#2c1810] mb-4 font-song tracking-widest flex items-center justify-center gap-6">
+              <span className="text-red-800 opacity-80 text-2xl">◈</span>
+              请输入您的出生信息
+              <span className="text-red-800 opacity-80 text-2xl">◈</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
+            
+            {/* 左侧区域 */}
+            <div className="space-y-12">
+              {/* 姓名 */}
+              <div className="group">
+                <label className="block text-xl font-bold text-[#4a3b32] mb-4 font-song pl-2 border-l-4 border-[#b22222]">
+                  姓名 <span className="text-sm font-normal text-gray-500 align-middle ml-2">（可选）</span>
+                </label>
+                <div className="relative mt-2">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="请输入姓名"
+                    className="w-full bg-transparent border-b-2 border-[#8b7e66] px-2 py-3 text-2xl text-[#2c1810] placeholder-[#c2bba8] focus:outline-none focus:border-[#b22222] transition-colors font-song"
+                  />
+                </div>
+              </div>
+
+              {/* 性别 */}
+              <div>
+                <label className="block text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222]">
+                  性别 <span className="text-[#b22222] align-top">*</span>
+                </label>
+                <div className="flex gap-8">
+                  <button
+                    type="button"
+                    onClick={() => setGender('Male')}
+                    className={`flex-1 py-4 px-6 rounded-lg border-2 transition-all duration-300 relative overflow-hidden group shadow-sm ${
+                      gender === 'Male'
+                        ? 'bg-[#8B3A3A] text-[#F5F2E9] border-[#5e2626] shadow-md transform -translate-y-1'
+                        : 'bg-transparent text-[#5d4037] border-[#8b7e66] hover:bg-[#8b7e66]/10'
+                    }`}
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-3 font-song text-xl tracking-widest">
+                      <span className="opacity-80 text-sm border border-current rounded-sm px-1 py-0.5">乾造</span> 男
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setGender('Female')}
+                    className={`flex-1 py-4 px-6 rounded-lg border-2 transition-all duration-300 relative overflow-hidden group shadow-sm ${
+                      gender === 'Female'
+                        ? 'bg-[#4A6A6A] text-[#F5F2E9] border-[#2f4545] shadow-md transform -translate-y-1'
+                        : 'bg-transparent text-[#5d4037] border-[#8b7e66] hover:bg-[#8b7e66]/10'
+                    }`}
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-3 font-song text-xl tracking-widest">
+                      <span className="opacity-80 text-sm border border-current rounded-sm px-1 py-0.5">坤造</span> 女
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 出生日期 - 重点修改区域 */}
+              <div>
+                <label className="block text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222]">
+                  出生日期 (公历) <span className="text-[#b22222] align-top">*</span>
+                </label>
+                
+                {/* 增加 w-full 确保外部容器本身也是满宽 */}
+                <div className="custom-date-input-wrapper w-full px-2">
+                  <SegmentedDateInput 
+                    value={birthDate} 
+                    onChange={setBirthDate} 
+                    minYear={1900} 
+                    maxYear={2100}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 右侧：时辰选择 */}
+            <div>
+              <label className="block text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222]">
+                出生时辰 <span className="text-[#b22222] align-top">*</span>
+              </label>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 md:gap-5">
+                {SHI_CHEN_LIST.map((sc) => {
+                  const isSelected = shiChen === sc.name;
+                  return (
+                    <button
+                      key={sc.name}
+                      type="button"
+                      onClick={() => setShiChen(sc.name as ShiChenName)}
+                      className={`relative py-3 rounded border-2 transition-all duration-300 flex flex-col items-center justify-center h-24
+                        ${isSelected 
+                          ? 'border-[#8B3A3A] bg-[#8B3A3A] text-[#F5F2E9] shadow-lg transform -translate-y-1' 
+                          : 'border-[#c2bba8] bg-transparent text-[#5d4037] hover:border-[#8b7e66] hover:bg-[#8b7e66]/5'
+                        }
+                      `}
+                    >
+                      <div className={`absolute top-2 bottom-2 left-1.5 w-1px ${isSelected ? 'bg-white/20' : 'bg-[#c2bba8]/30'}`}></div>
+                      <div className={`absolute top-2 bottom-2 right-1.5 w-1px ${isSelected ? 'bg-white/20' : 'bg-[#c2bba8]/30'}`}></div>
+
+                      <div className="font-song text-xl font-bold z-10">{sc.name}</div>
+                      <div className={`text-xs mt-1 z-10 ${isSelected ? 'text-[#eaddcf]' : 'text-[#8b7e66]'}`}>
+                        {sc.range}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* 计算结果区域 */}
+          {(calculating || calculatedData) && (
+            <div className="mt-12 pt-12 border-t-2 border-dashed border-[#8b7e66]/30">
+              {calculating && (
+                <div className="text-center text-xl text-[#8b7e66] font-song animate-pulse tracking-widest">
+                  ⟡ 正在排盘推演 ⟡
+                </div>
+              )}
+
+              {calculatedData && !calculating && (
+                <div className="animate-fade-in-up">
+                  <h3 className="font-bold text-3xl text-[#2f4545] text-center mb-10 font-song tracking-[0.2em]">
+                    — 八字排盘结果 —
+                  </h3>
+
+                  <div className="grid grid-cols-4 gap-8 md:gap-16 max-w-4xl mx-auto px-4">
+                    {[
+                      { label: '年柱', val: calculatedData.yearPillar },
+                      { label: '月柱', val: calculatedData.monthPillar },
+                      { label: '日柱', val: calculatedData.dayPillar },
+                      { label: '时柱', val: calculatedData.hourPillar },
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex flex-col items-center group">
+                        <span className="text-sm text-[#8b7e66] mb-3 font-serif tracking-widest group-hover:text-[#b22222] transition-colors">
+                          {item.label}
+                        </span>
+                        <div className="text-4xl md:text-5xl font-bold text-[#2c2c2c] font-calligraphy leading-tight">
+                          {item.val.split('').map((char, i) => (
+                            <span key={i} className="block">{char}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="text-center mt-12">
+                    <div className="inline-block px-8 py-3 border-t border-b border-[#8b7e66]/50">
+                        <span className="text-[#5c7a6b] text-lg font-song mr-4">起运年龄</span>
+                        <span className="text-3xl font-bold text-[#b22222] font-calligraphy">{calculatedData.startAge} 岁</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {error && (
+            <div className="text-[#a8071a] text-center text-lg font-song bg-red-50/50 py-2 border-t border-b border-red-100">
+              {error}
+            </div>
+          )}
+
+          <div className="pt-8 flex justify-center">
+            <Button
+              type="submit"
+              disabled={!calculatedData || calculating}
+              className={`
+                w-full md:w-1/2 py-5 text-2xl font-bold rounded-full shadow-xl transition-all duration-300 font-song tracking-[0.3em]
+                ${calculatedData 
+                  ? 'bg-[#8B3A3A] hover:bg-[#9e4242] text-[#F5F2E9] ring-4 ring-[#8B3A3A]/20' 
+                  : 'bg-[#d1cbb8] text-[#999] cursor-not-allowed'
+                }
+              `}
             >
-              <div className="font-medium">{sc.name}</div>
-              <div className="text-xs opacity-70">{sc.range}</div>
-            </button>
-          ))}
-        </div>
-        <p className="text-xs text-gray-500 mt-2">
-          不确定时辰？询问家人或查看出生证明
-        </p>
-      </div>
-
-      {/* 计算结果展示 */}
-      {calculating && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-blue-700 text-center">计算中...</p>
-        </div>
-      )}
-
-      {calculatedData && !calculating && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 space-y-4">
-          <h3 className="font-semibold text-green-900 text-center mb-4">
-            八字计算结果
-          </h3>
-
-          {/* 四柱展示 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              四柱干支
-            </label>
-            <div className="grid grid-cols-4 gap-3">
-              <div className="text-center">
-                <div className="text-xs text-gray-600 mb-1">年柱</div>
-                <div className="text-2xl font-bold text-gray-900 bg-white rounded-lg py-2">
-                  {calculatedData.yearPillar}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-gray-600 mb-1">月柱</div>
-                <div className="text-2xl font-bold text-gray-900 bg-white rounded-lg py-2">
-                  {calculatedData.monthPillar}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-gray-600 mb-1">日柱</div>
-                <div className="text-2xl font-bold text-gray-900 bg-white rounded-lg py-2">
-                  {calculatedData.dayPillar}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-gray-600 mb-1">时柱</div>
-                <div className="text-2xl font-bold text-gray-900 bg-white rounded-lg py-2">
-                  {calculatedData.hourPillar}
-                </div>
-              </div>
-            </div>
+              {calculatedData ? '点击以生成K线图' : '请先完善信息'}
+            </Button>
           </div>
 
-          {/* 起运信息 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              起运年龄
-            </label>
-            <div className="text-lg font-semibold text-gray-900 bg-white rounded-lg py-2 px-3">
-              {calculatedData.startAge} 岁
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 错误提示 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
-      )}
-
-      {/* 提交按钮 */}
-      <div className="pt-4">
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full"
-          disabled={!calculatedData || calculating}
-        >
-          {calculatedData ? '🤖 开始 AI 生成' : '请先填写完整信息'}
-        </Button>
+        </form>
       </div>
-
-      {/* 说明 */}
-      <div className="text-center text-xs text-gray-500 pt-2">
-        <p className="border-t border-gray-200 pt-3">
-          系统使用 lunar-javascript 库自动计算八字
-        </p>
-      </div>
-    </form>
+    </>
   );
 }
