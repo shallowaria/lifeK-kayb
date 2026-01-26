@@ -289,6 +289,79 @@ const SealStampLabel = (props: SealStampLabelProps): React.ReactElement | null =
   );
 };
 
+// Action Advice Stamp Label Component for Key Years
+interface ActionAdviceStampProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  index?: number;
+  [key: string]: unknown;
+}
+
+// 创建一个返回组件的函数，通过闭包访问 transformedData
+const createActionAdviceStampLabel = (dataPoints: (KLinePoint | InterpolatedKLinePoint)[]) => {
+  const ActionAdviceStamp = (props: ActionAdviceStampProps): React.ReactElement | null => {
+    const { x, y, width, index } = props;
+
+    if (index === undefined || x === undefined || y === undefined || width === undefined) return null;
+
+    const payload = dataPoints[index];
+    if (!payload || !payload.actionAdvice) return null;
+
+    const isUp = payload.close >= payload.open;
+    const character = isUp ? '启' : '变'; // 吉年刻"启"，凶年刻"变"
+
+    // 位置：在 K 线顶部上方约 4 像素处（避免与最高点印章重叠）
+    const stampY = y - 4;
+
+    return (
+      <g>
+        {/* 16x16 朱砂红印章 */}
+        <rect
+          x={x + width / 2 - 8}
+          y={stampY - 16}
+          width={16}
+          height={16}
+          fill="#B22D1B"
+          stroke="#8B1810"
+          strokeWidth={1.5}
+          rx={1.5}
+          ry={1.5}
+          opacity={0.95}
+        />
+
+        {/* 内部白色细边框 */}
+        <rect
+          x={x + width / 2 - 7}
+          y={stampY - 15}
+          width={14}
+          height={14}
+          fill="none"
+          stroke="#FFFFFF"
+          strokeWidth={0.8}
+          rx={1}
+          ry={1}
+        />
+
+        {/* 白色反显篆刻汉字 */}
+        <text
+          x={x + width / 2}
+          y={stampY - 4}
+          fill="#FFFFFF"
+          fontSize={10}
+          fontWeight="bold"
+          textAnchor="middle"
+          fontFamily="KaiTi, serif"
+        >
+          {character}
+        </text>
+      </g>
+    );
+  };
+  ActionAdviceStamp.displayName = 'ActionAdviceStamp';
+  return ActionAdviceStamp;
+};
+
 
 const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year', title, supportPressureLevels = [] }) => {
   // 计算MK10（10期移动平均线）
@@ -310,6 +383,12 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
     labelPoint: d.high,
     mk10: mk10Values[index]
   }));
+
+  // 创建关键年份印章组件（使用闭包访问数据）
+  const ActionAdviceStampLabel = React.useMemo(
+    () => createActionAdviceStampLabel(data),
+    [data]
+  );
 
   // Identify Da Yun change points to draw reference lines
   const daYunChanges = data.filter((d, i) => {
@@ -568,11 +647,19 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
             isAnimationActive={true}
             animationDuration={1500}
           >
+            {/* 最高点标记 */}
             <LabelList
               dataKey="high"
               position="top"
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               content={(props: any) => <SealStampLabel {...props} maxHigh={maxHigh} />}
+            />
+            {/* 关键年份行动指南标记 */}
+            <LabelList
+              dataKey="high"
+              position="top"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              content={(props: any) => <ActionAdviceStampLabel {...props} />}
             />
           </Bar>
 
