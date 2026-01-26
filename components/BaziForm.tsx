@@ -5,6 +5,7 @@ import { UserInput, Gender, ShiChenName } from '@/types';
 import { calculateBazi, validateBaziCalculationInput } from '@/lib/bazi-calculator';
 import { SHI_CHEN_LIST } from '@/lib/constants/shi-chen';
 import Button from './shared/Button';
+import SegmentedDateInput from './shared/SegmentedDateInput';
 
 interface BaziFormProps {
   onSubmit: (data: UserInput) => void | Promise<void>;
@@ -152,15 +153,11 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
         <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor='birthDate'>
           出生日期（公历） <span className="text-red-600">*</span>
         </label>
-        <input
-          id='birthDate'
-          title="出生日期"
-          type="date"
-          value={birthDate}
-          onChange={(e) => setBirthDate(e.target.value)}
-          min="1900-01-01"
-          max="2100-12-31"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+        <SegmentedDateInput 
+          value={birthDate} 
+          onChange={setBirthDate} 
+          minYear={1900} 
+          maxYear={2100}
         />
         <p className="text-xs text-gray-500 mt-1">请选择公历（阳历）日期</p>
       </div>
