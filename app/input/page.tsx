@@ -13,6 +13,7 @@ export default function InputPage() {
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string>('');
+  const [errorSuggestion, setErrorSuggestion] = useState<string>(''); // 新增：错误建议
 
   // 在客户端挂载后从 localStorage 加载数据
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function InputPage() {
   const handleAutoGenerate = async (data: UserInput) => {
     setIsGenerating(true);
     setGenerationError('');
+    setErrorSuggestion(''); // 清空之前的建议
     setCurrentStep(2); // 进度条显示为步骤 2
 
     try {
@@ -47,6 +49,9 @@ export default function InputPage() {
       const result = await response.json();
 
       if (!response.ok) {
+        // 保存错误信息和建议
+        setGenerationError(result.error || '生成失败');
+        setErrorSuggestion(result.suggestion || '请稍后重试');
         throw new Error(result.error || '生成失败');
       }
 
@@ -58,9 +63,12 @@ export default function InputPage() {
       router.push('/result');
     } catch (error) {
       console.error('自动生成失败:', error);
-      setGenerationError(
-        error instanceof Error ? error.message : '生成失败，请重试'
-      );
+      // 如果 setGenerationError 还没被设置，设置一个默认错误
+      if (!generationError) {
+        setGenerationError(
+          error instanceof Error ? error.message : '生成失败，请重试'
+        );
+      }
       setCurrentStep(1); // 失败后回到步骤 1
     } finally {
       setIsGenerating(false);
@@ -69,6 +77,7 @@ export default function InputPage() {
 
   const handleRetry = () => {
     setGenerationError('');
+    setErrorSuggestion('');
     setCurrentStep(1);
   };
 
@@ -113,9 +122,17 @@ export default function InputPage() {
           {/* 错误提示 */}
           {generationError && !isGenerating && (
             <div className="max-w-md mx-auto space-y-4">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h3 className="font-semibold text-red-900 mb-2">生成失败</h3>
-                <p className="text-sm text-red-700 mb-4">{generationError}</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-3">
+                <div>
+                  <h3 className="font-semibold text-red-900 mb-2">生成失败</h3>
+                  <p className="text-sm text-red-700">{generationError}</p>
+                </div>
+                {errorSuggestion && (
+                  <div className="bg-red-100 border border-red-300 rounded p-3">
+                    <p className="text-xs font-medium text-red-800 mb-1">💡 建议：</p>
+                    <p className="text-xs text-red-700">{errorSuggestion}</p>
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleRetry}

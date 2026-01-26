@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
+const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL;
 const ANTHROPIC_AUTH_TOKEN = process.env.ANTHROPIC_AUTH_TOKEN;
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022';
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL;
 
 export async function GET(request: NextRequest) {
   if (!ANTHROPIC_AUTH_TOKEN) {

@@ -4,9 +4,9 @@ import { generateUserPrompt, transformToLifeDestinyResult } from '@/lib/utils';
 import { validateChartData } from '@/lib/validator';
 
 // Anthropic API 配置
-const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
+const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL;
 const ANTHROPIC_AUTH_TOKEN = process.env.ANTHROPIC_AUTH_TOKEN;
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022';
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL;
 
 interface AnthropicMessage {
   role: 'user' | 'assistant';
@@ -94,19 +94,84 @@ export async function POST(request: NextRequest) {
       'Authorization': 'Bearer ***',
     });
 
-    let apiResponse;
-    try {
-      apiResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers,
-        body: requestBody,
-      });
-    } catch (fetchError) {
-      console.error('Fetch 请求失败:', fetchError);
+    // 重试配置
+    const MAX_RETRIES = 3;
+    const TIMEOUT_MS = 60000; // 60秒超时
+    const INITIAL_RETRY_DELAY = 1000; // 首次重试延迟1秒
+
+    // 创建带超时的 fetch
+    const fetchWithTimeout = (url: string, options: RequestInit, timeoutMs: number) => {
+      return Promise.race([
+        fetch(url, options),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('请求超时')), timeoutMs)
+        ),
+      ]);
+    };
+
+    // 指数退避重试逻辑
+    let apiResponse: Response | undefined;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`尝试调用 API (第 ${attempt}/${MAX_RETRIES} 次)...`);
+
+        apiResponse = await fetchWithTimeout(apiUrl, {
+          method: 'POST',
+          headers,
+          body: requestBody,
+        }, TIMEOUT_MS);
+
+        // 如果响应成功或者是客户端错误（4xx），不重试
+        if (apiResponse.ok || (apiResponse.status >= 400 && apiResponse.status < 500)) {
+          break;
+        }
+
+        // 服务器错误（5xx）且还有重试次数，则重试
+        if (attempt < MAX_RETRIES) {
+          const retryDelay = INITIAL_RETRY_DELAY * Math.pow(2, attempt - 1); // 指数退避：1s, 2s, 4s
+          console.log(`API 返回 ${apiResponse.status}，${retryDelay}ms 后重试...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          continue;
+        }
+
+      } catch (fetchError) {
+        lastError = fetchError instanceof Error ? fetchError : new Error('未知网络错误');
+        console.error(`第 ${attempt} 次请求失败:`, lastError.message);
+
+        // 如果还有重试次数，继续重试
+        if (attempt < MAX_RETRIES) {
+          const retryDelay = INITIAL_RETRY_DELAY * Math.pow(2, attempt - 1);
+          console.log(`${retryDelay}ms 后重试...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          continue;
+        }
+
+        // 所有重试都失败
+        const isTimeout = lastError.message === '请求超时';
+        return NextResponse.json(
+          {
+            error: isTimeout ? 'AI 服务响应超时' : '网络请求失败',
+            details: lastError.message,
+            errorType: isTimeout ? 'TIMEOUT' : 'NETWORK_ERROR',
+            suggestion: isTimeout
+              ? '请检查网络连接，或稍后重试'
+              : '请检查网络连接是否正常',
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    // 确保 apiResponse 存在（TypeScript 类型保护）
+    if (!apiResponse) {
       return NextResponse.json(
         {
-          error: '网络请求失败',
-          details: fetchError instanceof Error ? fetchError.message : '未知网络错误',
+          error: '所有重试均失败',
+          details: lastError?.message || '未知错误',
+          errorType: 'ALL_RETRIES_FAILED',
+          suggestion: '请检查网络连接，或稍后重试',
         },
         { status: 500 }
       );
@@ -127,10 +192,39 @@ export async function POST(request: NextRequest) {
         // 保持原始错误文本
       }
 
+      // 根据状态码提供更详细的错误信息和建议
+      let errorMessage = '';
+      let errorType = '';
+      let suggestion = '';
+
+      if (apiResponse.status === 503) {
+        errorMessage = 'AI 服务暂时不可用';
+        errorType = 'SERVICE_UNAVAILABLE';
+        suggestion = '服务器可能正在维护或负载过高，请稍后重试（已自动重试3次）';
+      } else if (apiResponse.status === 429) {
+        errorMessage = 'API 请求次数超限';
+        errorType = 'RATE_LIMIT';
+        suggestion = '请求过于频繁，请等待几分钟后重试';
+      } else if (apiResponse.status === 401 || apiResponse.status === 403) {
+        errorMessage = 'API 认证失败';
+        errorType = 'AUTH_ERROR';
+        suggestion = '服务器配置错误，请联系管理员';
+      } else if (apiResponse.status >= 500) {
+        errorMessage = 'AI 服务器错误';
+        errorType = 'SERVER_ERROR';
+        suggestion = '服务器遇到问题，请稍后重试';
+      } else {
+        errorMessage = `AI 服务调用失败: ${apiResponse.statusText}`;
+        errorType = 'API_ERROR';
+        suggestion = '请稍后重试，如果问题持续请联系管理员';
+      }
+
       return NextResponse.json(
         {
-          error: `AI 服务调用失败: ${apiResponse.statusText}`,
+          error: errorMessage,
           details: errorDetails,
+          errorType,
+          suggestion,
           statusCode: apiResponse.status,
         },
         { status: apiResponse.status }
