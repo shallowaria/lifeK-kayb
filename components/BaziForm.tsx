@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserInput, Gender, ShiChenName } from '@/types';
 import { calculateBazi, validateBaziCalculationInput } from '@/lib/bazi-calculator';
 import { SHI_CHEN_LIST } from '@/lib/constants/shi-chen';
 import Button from './shared/Button';
-import SegmentedDateInput from './shared/SegmentedDateInput';
+import SegmentedDateInput, { SegmentedDateInputRef } from './shared/SegmentedDateInput';
 import './BaziForm.module.css';
 
 interface BaziFormProps {
@@ -16,11 +16,12 @@ interface BaziFormProps {
 export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
   const [name, setName] = useState(initialData?.name || '');
   const [gender, setGender] = useState<Gender>(initialData?.gender || 'Male');
-  const [birthDate, setBirthDate] = useState(''); 
+  const [birthDate, setBirthDate] = useState('');
   const [shiChen, setShiChen] = useState<ShiChenName>('子时');
   const [calculatedData, setCalculatedData] = useState<UserInput | null>(null);
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState<string>('');
+  const dateInputRef = useRef<SegmentedDateInputRef>(null);
 
   useEffect(() => {
     if (birthDate && shiChen && gender) {
@@ -70,10 +71,27 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate date input before submission
+    const dateValidation = dateInputRef.current?.validate();
+    if (dateValidation && !dateValidation.valid) {
+      setError(dateValidation.error);
+      return;
+    }
+
     if (!calculatedData) {
       setError('请先填写出生日期和时辰');
       return;
     }
+
+    // Additional check: ensure birthDate hasn't been tampered with
+    const calculatedBirthDate = calculatedData.birthDate;
+    if (birthDate !== calculatedBirthDate) {
+      setError('出生日期已修改，请重新计算八字');
+      setCalculatedData(null);
+      return;
+    }
+
     onSubmit(calculatedData);
   };
 
@@ -157,10 +175,11 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
                 
                 {/* 增加 w-full 确保外部容器本身也是满宽 */}
                 <div className="custom-date-input-wrapper w-full px-2">
-                  <SegmentedDateInput 
-                    value={birthDate} 
-                    onChange={setBirthDate} 
-                    minYear={1900} 
+                  <SegmentedDateInput
+                    ref={dateInputRef}
+                    value={birthDate}
+                    onChange={setBirthDate}
+                    minYear={1900}
                     maxYear={2100}
                   />
                 </div>
