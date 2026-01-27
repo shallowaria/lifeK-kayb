@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { UserInput } from '@/types';
-import { saveToLocalStorage, loadFromLocalStorage } from '@/lib/utils';
-import StepIndicator from '@/components/shared/StepIndicator';
-import BaziForm from '@/components/BaziForm';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { UserInput } from "@/types";
+import { saveToLocalStorage, loadFromLocalStorage } from "@/lib/utils";
+import StepIndicator from "@/components/shared/StepIndicator";
+import BaziForm from "@/components/BaziForm";
 
 export default function InputPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationError, setGenerationError] = useState<string>('');
-  const [errorSuggestion, setErrorSuggestion] = useState<string>(''); // 新增：错误建议
+  const [generationError, setGenerationError] = useState<string>("");
+  const [errorSuggestion, setErrorSuggestion] = useState<string>(""); // 新增：错误建议
 
   // 在客户端挂载后从 localStorage 加载数据
   useEffect(() => {
-    const savedData = loadFromLocalStorage<UserInput>('userInput');
+    const savedData = loadFromLocalStorage<UserInput>("userInput");
     if (savedData) {
       setUserInput(savedData);
     }
@@ -25,7 +25,7 @@ export default function InputPage() {
 
   const handleBaziFormSubmit = async (data: UserInput) => {
     setUserInput(data);
-    saveToLocalStorage('userInput', data);
+    saveToLocalStorage("userInput", data);
 
     // 直接开始 AI 生成
     await handleAutoGenerate(data);
@@ -33,15 +33,15 @@ export default function InputPage() {
 
   const handleAutoGenerate = async (data: UserInput) => {
     setIsGenerating(true);
-    setGenerationError('');
-    setErrorSuggestion(''); // 清空之前的建议
+    setGenerationError("");
+    setErrorSuggestion(""); // 清空之前的建议
     setCurrentStep(2); // 进度条显示为步骤 2
 
     try {
-      const response = await fetch('/api/generate-destiny', {
-        method: 'POST',
+      const response = await fetch("/api/generate-destiny", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
@@ -50,23 +50,23 @@ export default function InputPage() {
 
       if (!response.ok) {
         // 保存错误信息和建议
-        setGenerationError(result.error || '生成失败');
-        setErrorSuggestion(result.suggestion || '请稍后重试');
-        throw new Error(result.error || '生成失败');
+        setGenerationError(result.error || "生成失败");
+        setErrorSuggestion(result.suggestion || "请稍后重试");
+        throw new Error(result.error || "生成失败");
       }
 
       // 保存结果数据
-      saveToLocalStorage('lifeDestinyResult', result.data);
-      saveToLocalStorage('userName', data.name || '未命名');
+      saveToLocalStorage("lifeDestinyResult", result.data);
+      saveToLocalStorage("userName", data.name || "未命名");
 
       // 跳转到结果页面
-      router.push('/result');
+      router.push("/result");
     } catch (error) {
-      console.error('自动生成失败:', error);
+      console.error("自动生成失败:", error);
       // 如果 setGenerationError 还没被设置，设置一个默认错误
       if (!generationError) {
         setGenerationError(
-          error instanceof Error ? error.message : '生成失败，请重试'
+          error instanceof Error ? error.message : "生成失败，请重试",
         );
       }
       setCurrentStep(1); // 失败后回到步骤 1
@@ -76,19 +76,17 @@ export default function InputPage() {
   };
 
   const handleRetry = () => {
-    setGenerationError('');
-    setErrorSuggestion('');
+    setGenerationError("");
+    setErrorSuggestion("");
     setCurrentStep(1);
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-red-50 via-orange-50 to-yellow-50 py-12 px-4">
+    <div className="min-h-screen bg-linear-to-br from-red-50 via-orange-300 to-yellow-100 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* 标题 */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            人生K线图
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">人生K线图</h1>
           <p className="text-lg text-gray-600">
             用 AI 和八字命理绘制您的人生运势曲线
           </p>
@@ -98,7 +96,7 @@ export default function InputPage() {
         <StepIndicator currentStep={currentStep} totalSteps={2} />
 
         {/* 内容卡片 */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+        <div className=" rounded-2xl p-8 md:p-12">
           {/* 自动生成加载状态 */}
           {isGenerating && (
             <div className="text-center space-y-6">
@@ -129,7 +127,9 @@ export default function InputPage() {
                 </div>
                 {errorSuggestion && (
                   <div className="bg-red-100 border border-red-300 rounded p-3">
-                    <p className="text-xs font-medium text-red-800 mb-1">💡 建议：</p>
+                    <p className="text-xs font-medium text-red-800 mb-1">
+                      💡 建议：
+                    </p>
                     <p className="text-xs text-red-700">{errorSuggestion}</p>
                   </div>
                 )}
@@ -154,9 +154,7 @@ export default function InputPage() {
 
         {/* 免责声明 */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>
-            本工具仅供娱乐参考，命理分析由 AI 生成，不构成任何投资建议。
-          </p>
+          <p>本工具仅供娱乐参考，命理分析由 AI 生成，不构成任何投资建议。</p>
         </div>
       </div>
     </div>

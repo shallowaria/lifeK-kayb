@@ -6,6 +6,7 @@ import { calculateBazi, validateBaziCalculationInput } from '@/lib/bazi-calculat
 import { SHI_CHEN_LIST } from '@/lib/constants/shi-chen';
 import Button from './shared/Button';
 import SegmentedDateInput from './shared/SegmentedDateInput';
+import './BaziForm.module.css';
 
 interface BaziFormProps {
   onSubmit: (data: UserInput) => void | Promise<void>;
@@ -77,72 +78,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
   };
 
   return (
-    <>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
-        
-        .font-song { font-family: 'Noto Serif SC', serif; }
-        .font-calligraphy { font-family: 'Ma Shan Zheng', cursive; }
-        
-        .bg-rice-paper {
-          background-color: #fdfbf7;
-          background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d1cbb8' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E");
-        }
-
-        /* * 修复核心：日期输入框样式穿透 
-         */
-        
-        /* 1. 确保 wrapper 占满宽度 */
-        .custom-date-input-wrapper {
-          width: 100%;
-        }
-
-        /* 2. 强制内部 flex 容器布局 */
-        .custom-date-input-wrapper > div {
-          display: flex !important;
-          flex-direction: row !important;
-          width: 100% !important;
-          gap: 1.5rem !important; /* 保持间距，但稍微收一点点防止手机端换行 */
-          justify-content: space-between !important;
-        }
-        
-        /* 3. 核心修复：强制 Input 撑开宽度，避免塌陷 */
-        .custom-date-input-wrapper input, 
-        .custom-date-input-wrapper select {
-          display: block !important;
-          flex: 1 1 auto !important;
-          min-width: 60px !important;
-          width: auto !important;
-          max-width: 60px !important;
-          
-          background-color: transparent !important;
-          border: none !important;
-          border-bottom: 2px solid #8b7e66 !important;
-          border-radius: 0 !important;
-           padding: 0.5rem 0.2rem !important; /* 稍微减小左右 padding，留给文字更多空间 */
-          
-          font-family: 'Noto Serif SC', serif !important;
-          font-size: 1.25rem !important;
-          text-align: center !important;
-          box-shadow: none !important;
-          color: #2c1810 !important;
-        }
-
-        /* 隐藏掉可能的默认箭头或图标，保持清爽 */
-        .custom-date-input-wrapper input::-webkit-calendar-picker-indicator {
-          opacity: 0.5;
-           filter: sepia(100%) hue-rotate(-50deg) saturate(600%); /* 尝试将图标染成古铜色 */
-        }
-
-        .custom-date-input-wrapper input:focus,
-        .custom-date-input-wrapper select:focus {
-          border-bottom-color: #b22222 !important;
-          outline: none !important;
-        }
-      `}</style>
-
-      {/* 主容器 */}
-      <div className="relative font-song bg-rice-paper p-6 md:p-12 lg:p-16 rounded-xl shadow-2xl border-[6px] border-double border-[#8b7e66] mx-auto max-w-5xl">
+    <div className="relative font-song bg-rice-paper p-6 md:p-12 lg:p-16 rounded-xl shadow-2xl border-[6px] border-double border-[#8b7e66] mx-auto max-w-5xl">
         
         <div className="absolute top-0 left-0 w-full h-4 bg-linear-to-b from-[#8b7e66]/10 to-transparent"></div>
 
@@ -335,6 +271,5 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
         </form>
       </div>
-    </>
   );
 }

@@ -1,58 +1,68 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { LifeDestinyResult, UserInput } from '@/types';
-import { loadFromLocalStorage, exportToJson, exportToHtml, migrateLegacyUserInput } from '@/lib/utils';
-import { getDailyViewRange, getWeeklyViewRange, calculateVirtualAge } from '@/lib/date-utils';
-import { interpolateDailyData } from '@/lib/interpolation';
-import LifeKLineChart from '@/components/LifeKLineChart';
-import AnalysisResult from '@/components/AnalysisResult';
-import ActionAdvicePanel from '@/components/ActionAdvicePanel';
-import RiskWarningBanner from '@/components/RiskWarningBanner';
-import ViewSwitcher, { ViewMode } from '@/components/ViewSwitcher';
-import Button from '@/components/shared/Button';
-import { Download, FileJson, Printer, RotateCcw } from 'lucide-react';
+import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { LifeDestinyResult, UserInput } from "@/types";
+import {
+  loadFromLocalStorage,
+  exportToJson,
+  exportToHtml,
+  migrateLegacyUserInput,
+} from "@/lib/utils";
+import {
+  getDailyViewRange,
+  getWeeklyViewRange,
+  calculateVirtualAge,
+} from "@/lib/date-utils";
+import { interpolateDailyData } from "@/lib/interpolation";
+import LifeKLineChart from "@/components/LifeKLineChart";
+import AnalysisResult from "@/components/AnalysisResult";
+import ActionAdvicePanel from "@/components/ActionAdvicePanel";
+import RiskWarningBanner from "@/components/RiskWarningBanner";
+import ViewSwitcher, { ViewMode } from "@/components/ViewSwitcher";
+import Button from "@/components/shared/Button";
+import { Download, FileJson, Printer, RotateCcw } from "lucide-react";
 
 export default function ResultPage() {
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<ViewMode>('year');
+  const [viewMode, setViewMode] = useState<ViewMode>("year");
   const [currentDate] = useState(new Date());
 
   const [result] = useState<LifeDestinyResult | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return loadFromLocalStorage<LifeDestinyResult>('lifeDestinyResult');
+    if (typeof window === "undefined") return null;
+    return loadFromLocalStorage<LifeDestinyResult>("lifeDestinyResult");
   });
 
   const [userInput] = useState<UserInput | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const input = loadFromLocalStorage<UserInput>('userInput');
+    if (typeof window === "undefined") return null;
+    const input = loadFromLocalStorage<UserInput>("userInput");
     return input ? migrateLegacyUserInput(input) : null;
   });
 
   const [userName] = useState<string>(() => {
-    if (typeof window === 'undefined') return '未命名';
-    return loadFromLocalStorage<string>('userName') || '未命名';
+    if (typeof window === "undefined") return "未命名";
+    return loadFromLocalStorage<string>("userName") || "未命名";
   });
 
   // 根据视图模式计算显示的数据
   const chartData = useMemo(() => {
     if (!result) return [];
 
-    if (viewMode === 'year') {
+    if (viewMode === "year") {
       return result.chartData;
     }
 
     // 日视图和周视图需要出生日期
     if (!userInput?.birthDate) {
-      console.warn('Birth date not available, falling back to year view');
+      console.warn("Birth date not available, falling back to year view");
       return result.chartData;
     }
 
     const birthDate = new Date(userInput.birthDate);
-    const range = viewMode === 'day'
-      ? getDailyViewRange(currentDate)
-      : getWeeklyViewRange(currentDate);
+    const range =
+      viewMode === "day"
+        ? getDailyViewRange(currentDate)
+        : getWeeklyViewRange(currentDate);
 
     return interpolateDailyData(range, birthDate, result.chartData);
   }, [result, userInput, viewMode, currentDate]);
@@ -66,8 +76,8 @@ export default function ResultPage() {
   // 格式化日期
   const formatDate = (date: Date) => {
     const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
     return `${y}/${m}/${d}`;
   };
 
@@ -77,21 +87,21 @@ export default function ResultPage() {
   // 获取图表标题
   const getChartTitle = () => {
     switch (viewMode) {
-      case 'year':
-        return '人生流年大运K线图(30年全景）';
+      case "year":
+        return "人生流年大运K线图(30年全景）";
 
-      case 'mouth': {
+      case "mouth": {
         const { start, end } = getWeeklyViewRange(currentDate);
         return `近期运势走势（${formatRange(start, end)}）`;
       }
 
-      case 'day': {
+      case "day": {
         const { start, end } = getDailyViewRange(currentDate);
         return `每日运势详情（${formatRange(start, end)}）`;
       }
 
       default:
-        return '人生流年大运K线图';
+        return "人生流年大运K线图";
     }
   };
 
@@ -104,71 +114,83 @@ export default function ResultPage() {
     if (!result) return;
 
     // 生成支撑压力位表格（如果有）
-    const spLevelsTable = result.analysis.supportPressureLevels &&
+    const spLevelsTable =
+      result.analysis.supportPressureLevels &&
       result.analysis.supportPressureLevels.length > 0
-      ? `
+        ? `
   <div class="section">
     <h2>支撑位与压力位分析</h2>
     <table>
       <tr><th>年龄</th><th>类型</th><th>强度</th><th>数值</th><th>十神</th><th>原因</th></tr>
-      ${result.analysis.supportPressureLevels.map(level => `
+      ${result.analysis.supportPressureLevels
+        .map(
+          (level) => `
         <tr>
           <td>${level.age}</td>
-          <td>${level.type === 'support' ? '🟢 支撑位' : '🔴 压力位'}</td>
-          <td>${level.strength === 'strong' ? '强' : level.strength === 'medium' ? '中' : '弱'}</td>
+          <td>${level.type === "support" ? "🟢 支撑位" : "🔴 压力位"}</td>
+          <td>${level.strength === "strong" ? "强" : level.strength === "medium" ? "中" : "弱"}</td>
           <td>${level.value}</td>
-          <td>${level.tenGod || '-'}</td>
+          <td>${level.tenGod || "-"}</td>
           <td>${level.reason}</td>
         </tr>
-      `).join('')}
+      `,
+        )
+        .join("")}
     </table>
   </div>
       `
-      : '';
+        : "";
 
     // 生成行动指南表格（如果有）
-    const actionAdviceTable = result.chartData.some(p => p.actionAdvice)
+    const actionAdviceTable = result.chartData.some((p) => p.actionAdvice)
       ? `
   <div class="section">
     <h2>关键年份行动指南</h2>
     ${result.chartData
-      .filter(p => p.actionAdvice)
-      .map(point => `
+      .filter((p) => p.actionAdvice)
+      .map(
+        (point) => `
         <div style="margin-bottom: 20px; padding: 15px; border-left: 4px solid #4f46e5; background: #f9fafb;">
           <h3 style="margin: 0 0 10px 0; color: #1f2937;">
             ${point.age}岁 (${point.year}年) - ${point.ganZhi}
-            ${point.tenGod ? `[${point.tenGod}]` : ''}
-            ${point.actionAdvice?.scenario ? `<span style="font-size: 12px; background: #dbeafe; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">${point.actionAdvice.scenario}</span>` : ''}
+            ${point.tenGod ? `[${point.tenGod}]` : ""}
+            ${point.actionAdvice?.scenario ? `<span style="font-size: 12px; background: #dbeafe; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">${point.actionAdvice.scenario}</span>` : ""}
           </h3>
 
           <div style="margin-bottom: 10px;">
             <strong style="color: #059669;">✅ 建议行动：</strong>
             <ol style="margin: 5px 0; padding-left: 20px;">
-              ${point.actionAdvice!.suggestions.map(s => `<li>${s}</li>`).join('')}
+              ${point.actionAdvice!.suggestions.map((s) => `<li>${s}</li>`).join("")}
             </ol>
           </div>
 
           <div style="margin-bottom: 10px;">
             <strong style="color: #dc2626;">⚠️ 规避提醒：</strong>
             <ul style="margin: 5px 0; padding-left: 20px;">
-              ${point.actionAdvice!.warnings.map(w => `<li>${w}</li>`).join('')}
+              ${point.actionAdvice!.warnings.map((w) => `<li>${w}</li>`).join("")}
             </ul>
           </div>
 
-          ${point.actionAdvice!.basis ? `
+          ${
+            point.actionAdvice!.basis
+              ? `
             <div style="background: #faf5ff; padding: 10px; margin-top: 10px; border-radius: 4px; font-size: 14px; color: #7c3aed;">
               <strong>玄学依据：</strong>${point.actionAdvice!.basis}
             </div>
-          ` : ''}
+          `
+              : ""
+          }
 
           <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb; font-size: 13px; color: #6b7280;">
             ${point.reason}
           </div>
         </div>
-      `).join('')}
+      `,
+      )
+      .join("")}
   </div>
       `
-      : '';
+      : "";
 
     // 生成简单的 HTML 内容
     const htmlContent = `
@@ -238,22 +260,26 @@ export default function ResultPage() {
     <h2>流年详批（1-30岁）</h2>
     <table>
       <tr><th>年龄</th><th>年份</th><th>干支</th><th>大运</th><th>评分</th><th>详批</th></tr>
-      ${result.chartData.map(point => `
+      ${result.chartData
+        .map(
+          (point) => `
         <tr>
           <td>${point.age}</td>
           <td>${point.year}</td>
           <td>${point.ganZhi}</td>
-          <td>${point.daYun || '-'}</td>
+          <td>${point.daYun || "-"}</td>
           <td>${point.score}/10</td>
           <td>${point.reason}</td>
         </tr>
-      `).join('')}
+      `,
+        )
+        .join("")}
     </table>
   </div>
 
   <footer style="text-align: center; color: #6b7280; margin-top: 40px; font-size: 14px;">
     <p>本工具仅供娱乐参考，命理分析由 AI 生成，不构成任何投资建议。</p>
-    <p>生成时间：${new Date().toLocaleString('zh-CN')}</p>
+    <p>生成时间：${new Date().toLocaleString("zh-CN")}</p>
   </footer>
 </body>
 </html>
@@ -267,19 +293,15 @@ export default function ResultPage() {
   };
 
   const handleReset = () => {
-    router.push('/input');
+    router.push("/input");
   };
 
   if (!result) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            暂无数据
-          </h2>
-          <p className="text-gray-600 mb-6">
-            请先完成八字输入和 AI 分析流程
-          </p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">暂无数据</h2>
+          <p className="text-gray-600 mb-6">请先完成八字输入和 AI 分析流程</p>
           <Button onClick={handleReset} variant="primary">
             开始排盘
           </Button>
@@ -292,15 +314,13 @@ export default function ResultPage() {
     <div className="min-h-screen paper-texture py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* 标题和操作栏 */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 no-print">
+        <div className="bg-xuanpaper rounded-2xl shadow-lg p-6 mb-8 no-print">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {userName} - 人生K线图
               </h1>
-              <p className="text-gray-600">
-                基于八字命理的运势可视化分析
-              </p>
+              <p className="text-gray-600">基于八字命理的运势可视化分析</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button
@@ -340,7 +360,7 @@ export default function ResultPage() {
         </div>
 
         {/* 视图切换器 */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div className="bg-xuanpaper rounded-2xl shadow-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">
@@ -348,7 +368,8 @@ export default function ResultPage() {
               </h2>
               {currentAge && (
                 <p className="text-sm text-gray-600">
-                  当前虚岁：{currentAge}岁 | 今日：{currentDate.toLocaleDateString('zh-CN')}
+                  当前虚岁：{currentAge}岁 | 今日：
+                  {currentDate.toLocaleDateString("zh-CN")}
                 </p>
               )}
               {!userInput?.birthDate && (
@@ -376,7 +397,7 @@ export default function ResultPage() {
             title={getChartTitle()}
             supportPressureLevels={result?.analysis.supportPressureLevels}
           />
-          {viewMode !== 'year' && (
+          {viewMode !== "year" && (
             <div className="mt-4 text-center text-sm text-gray-500">
               <p>📊 数据基于年度运势插值计算，仅供参考</p>
             </div>
@@ -384,7 +405,7 @@ export default function ResultPage() {
         </div>
 
         {/* 命理分析面板（仅在年视图显示） */}
-        {viewMode === 'year' && (
+        {viewMode === "year" && (
           <>
             <AnalysisResult analysis={result.analysis} />
 
@@ -397,12 +418,8 @@ export default function ResultPage() {
 
         {/* 免责声明 */}
         <div className="mt-12 text-center text-sm text-gray-500 no-print">
-          <p>
-            本工具仅供娱乐参考，命理分析由 AI 生成，不构成任何投资建议。
-          </p>
-          <p className="mt-2">
-            命运由多种因素共同决定，请理性看待分析结果。
-          </p>
+          <p>本工具仅供娱乐参考，命理分析由 AI 生成，不构成任何投资建议。</p>
+          <p className="mt-2">命运由多种因素共同决定，请理性看待分析结果。</p>
         </div>
       </div>
     </div>
