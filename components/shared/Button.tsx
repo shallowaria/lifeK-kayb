@@ -1,29 +1,29 @@
-import React from 'react';
+import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: "primary" | "secondary" | "outline";
   loading?: boolean;
   children: React.ReactNode;
 }
 
 export default function Button({
-  variant = 'primary',
+  variant = "primary",
   loading = false,
   disabled,
   children,
-  className = '',
+  className = "",
   ...props
 }: ButtonProps) {
   const baseStyles =
-    'px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+    "px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variantStyles = {
     primary:
-      'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg',
+      "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-md hover:shadow-lg",
     secondary:
-      'bg-gray-600 text-white hover:bg-gray-700 active:bg-gray-800 shadow-md hover:shadow-lg',
+      "bg-gray-600 text-white hover:bg-gray-700 active:bg-gray-800 shadow-md hover:shadow-lg",
     outline:
-      'border-2 border-red-600 text-red-600 hover:bg-red-50 active:bg-red-100',
+      "border-2 border-red-600 text-red-600 hover:bg-red-50 active:bg-red-100",
   };
 
   return (

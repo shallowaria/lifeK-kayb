@@ -39,62 +39,62 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
     const isInterpolated = 'isInterpolated' in data && data.isInterpolated;
 
     return (
-      <div className="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-2xl border border-gray-200 z-50 w-[320px] md:w-[400px]">
+      <div className="bg-white/95 backdrop-blur-sm p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl shadow-2xl border border-gray-200 z-50 w-[280px] sm:w-[320px] md:w-[400px]">
         {/* Header */}
-        <div className="flex justify-between items-start mb-3 border-b border-gray-100 pb-2">
+        <div className="flex justify-between items-start mb-2 sm:mb-3 border-b border-gray-100 pb-1.5 sm:pb-2">
           <div>
-            <p className="text-xl font-bold text-gray-800">
+            <p className="text-base sm:text-lg md:text-xl font-bold text-gray-800">
               {isInterpolated && 'date' in data ? (
                 <>
-                  {data.date} <span className="text-base text-gray-500">({data.age}岁)</span>
+                  {data.date} <span className="text-xs sm:text-sm md:text-base text-gray-500">({data.age}岁)</span>
                 </>
               ) : (
                 <>
-                  {data.year} {data.ganZhi}年 <span className="text-base text-gray-500">({data.age}岁)</span>
+                  {data.year} {data.ganZhi}年 <span className="text-xs sm:text-sm md:text-base text-gray-500">({data.age}岁)</span>
                 </>
               )}
             </p>
-            <p className="text-sm text-indigo-600 font-medium mt-1">
+            <p className="text-xs sm:text-sm text-indigo-600 font-medium mt-0.5 sm:mt-1">
               大运：{data.daYun || '未知'}
             </p>
             {/* 新增：显示十神 */}
             {data.tenGod && (
-              <p className="text-sm text-purple-600 font-medium mt-1">
+              <p className="text-xs sm:text-sm text-purple-600 font-medium mt-0.5 sm:mt-1">
                 十神：{data.tenGod}
               </p>
             )}
           </div>
-          <div className={`text-base font-bold px-2 py-1 rounded ${isUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          <div className={`text-xs sm:text-sm md:text-base font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${isUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
             {isUp ? '吉 ▲' : '凶 ▼'}
           </div>
         </div>
 
         {/* Data Grid */}
-        <div className="grid grid-cols-4 gap-2 text-xs text-gray-500 mb-4 bg-gray-50 p-2 rounded">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-500 mb-3 sm:mb-4 bg-gray-50 p-1.5 sm:p-2 rounded">
           <div className="text-center">
             <span className="block scale-90">开盘</span>
-            <span className="font-mono text-gray-700 font-bold">{data.open}</span>
+            <span className="font-mono text-gray-700 font-bold text-xs sm:text-sm">{data.open}</span>
           </div>
           <div className="text-center">
             <span className="block scale-90">收盘</span>
-            <span className="font-mono text-gray-700 font-bold">{data.close}</span>
+            <span className="font-mono text-gray-700 font-bold text-xs sm:text-sm">{data.close}</span>
           </div>
           <div className="text-center">
             <span className="block scale-90">最高</span>
-            <span className="font-mono text-gray-700 font-bold">{data.high}</span>
+            <span className="font-mono text-gray-700 font-bold text-xs sm:text-sm">{data.high}</span>
           </div>
           <div className="text-center">
             <span className="block scale-90">最低</span>
-            <span className="font-mono text-gray-700 font-bold">{data.low}</span>
+            <span className="font-mono text-gray-700 font-bold text-xs sm:text-sm">{data.low}</span>
           </div>
         </div>
 
         {/* 新增：能量分数显示 */}
         {data.energyScore && (
-          <div className="mt-3 mb-3 p-3 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-bold text-blue-900">能量分数</span>
-              <span className={`text-lg font-bold ${
+          <div className="mt-2 sm:mt-3 mb-2 sm:mb-3 p-2 sm:p-3 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <div className="flex justify-between items-center mb-1.5 sm:mb-2">
+              <span className="text-[10px] sm:text-xs font-bold text-blue-900">能量分数</span>
+              <span className={`text-base sm:text-lg font-bold ${
                 data.energyScore.isBelowSupport
                   ? 'text-red-600'
                   : data.energyScore.total >= 7
@@ -104,7 +104,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
                 {data.energyScore.total.toFixed(1)}
               </span>
             </div>
-            <div className="space-y-1 text-xs text-gray-600">
+            <div className="space-y-0.5 sm:space-y-1 text-[10px] sm:text-xs text-gray-600">
               <div className="flex justify-between">
                 <span>月令系数:</span>
                 <span className="font-mono">{data.energyScore.monthCoefficient}</span>
@@ -119,7 +119,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
               </div>
             </div>
             {data.energyScore.isBelowSupport && (
-              <div className="mt-2 text-xs text-red-700 font-medium">
+              <div className="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-red-700 font-medium">
                 ⚠️ 已跌破支撑位
               </div>
             )}
@@ -127,33 +127,33 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
         )}
 
         {/* Detailed Reason */}
-        <div className="text-sm text-gray-700 leading-relaxed text-justify max-h-[200px] overflow-y-auto custom-scrollbar">
+        <div className="text-xs sm:text-sm text-gray-700 leading-relaxed text-justify max-h-[150px] sm:max-h-[200px] overflow-y-auto custom-scrollbar">
           {data.reason}
         </div>
 
         {/* 行动指南 */}
         {data.actionAdvice && (
-          <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-bold text-indigo-900 flex items-center gap-1">
-                <Target className="w-4 h-4" />
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 space-y-2 sm:space-y-3">
+            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+              <h4 className="text-xs sm:text-sm font-bold text-indigo-900 flex items-center gap-1">
+                <Target className="w-3 h-3 sm:w-4 sm:h-4" />
                 行动指南
               </h4>
               {data.actionAdvice.scenario && (
-                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
                   {data.actionAdvice.scenario}
                 </span>
               )}
             </div>
 
             {/* 建议行动 */}
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-green-800 mb-1 flex items-center gap-1">
-                <Lightbulb className="w-3.5 h-3.5" />
+            <div className="space-y-1 sm:space-y-1.5">
+              <p className="text-[10px] sm:text-xs font-semibold text-green-800 mb-0.5 sm:mb-1 flex items-center gap-1">
+                <Lightbulb className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 建议行动
               </p>
               {data.actionAdvice.suggestions.map((suggestion, idx) => (
-                <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                <div key={idx} className="flex items-start gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-700">
                   <span className="text-green-600 font-bold mt-0.5">{idx + 1}.</span>
                   <span className="flex-1">{suggestion}</span>
                 </div>
@@ -161,13 +161,13 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
             </div>
 
             {/* 规避提醒 */}
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-red-800 mb-1 flex items-center gap-1">
-                <AlertTriangle className="w-3.5 h-3.5" />
+            <div className="space-y-1 sm:space-y-1.5">
+              <p className="text-[10px] sm:text-xs font-semibold text-red-800 mb-0.5 sm:mb-1 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 规避提醒
               </p>
               {data.actionAdvice.warnings.map((warning, idx) => (
-                <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                <div key={idx} className="flex items-start gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-700">
                   <span className="text-red-600 font-bold mt-0.5">•</span>
                   <span className="flex-1">{warning}</span>
                 </div>
@@ -176,7 +176,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
 
             {/* 玄学依据 */}
             {data.actionAdvice.basis && (
-              <div className="text-xs text-purple-700 bg-purple-50 p-2 rounded border border-purple-200">
+              <div className="text-[10px] sm:text-xs text-purple-700 bg-purple-50 p-1.5 sm:p-2 rounded border border-purple-200">
                 <span className="font-semibold">玄学依据：</span>
                 {data.actionAdvice.basis}
               </div>
@@ -244,14 +244,21 @@ const SealStampLabel = (props: SealStampLabelProps): React.ReactElement | null =
 
   if (value !== maxHigh) return null;
 
+  // 响应式尺寸：移动端20x20, tablet 25x25, desktop 30x30
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const isTablet = typeof window !== 'undefined' && window.innerWidth >= 640 && window.innerWidth < 1024;
+  const size = isMobile ? 20 : isTablet ? 25 : 30;
+  const fontSize = isMobile ? 9 : isTablet ? 10 : 11;
+  const offsetY = isMobile ? 28 : isTablet ? 32 : 35;
+
   return (
     <g>
       {/* Cinnabar seal stamp */}
       <rect
-        x={x + width / 2 - 15}
-        y={y - 35}
-        width={30}
-        height={30}
+        x={x + width / 2 - size / 2}
+        y={y - offsetY}
+        width={size}
+        height={size}
         fill="#B22D1B"
         stroke="#8B1810"
         strokeWidth={2}
@@ -262,10 +269,10 @@ const SealStampLabel = (props: SealStampLabelProps): React.ReactElement | null =
 
       {/* Inner white border */}
       <rect
-        x={x + width / 2 - 13}
-        y={y - 33}
-        width={26}
-        height={26}
+        x={x + width / 2 - (size - 4) / 2}
+        y={y - offsetY + 2}
+        width={size - 4}
+        height={size - 4}
         fill="none"
         stroke="#FFFFFF"
         strokeWidth={1}
@@ -276,9 +283,9 @@ const SealStampLabel = (props: SealStampLabelProps): React.ReactElement | null =
       {/* White reversed score */}
       <text
         x={x + width / 2}
-        y={y - 15}
+        y={y - offsetY + size / 2 + fontSize / 2 - 1}
         fill="#FFFFFF"
-        fontSize={11}
+        fontSize={fontSize}
         fontWeight="bold"
         textAnchor="middle"
         fontFamily="KaiTi, serif"
@@ -311,17 +318,23 @@ const createActionAdviceStampLabel = (dataPoints: (KLinePoint | InterpolatedKLin
     const isUp = payload.close >= payload.open;
     const character = isUp ? '启' : '变'; // 吉年刻"启"，凶年刻"变"
 
+    // 响应式尺寸：移动端12x12, desktop 16x16
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    const size = isMobile ? 12 : 16;
+    const fontSize = isMobile ? 8 : 10;
+    const offsetY = isMobile ? 3 : 4;
+
     // 位置：在 K 线顶部上方约 4 像素处（避免与最高点印章重叠）
-    const stampY = y - 4;
+    const stampY = y - offsetY;
 
     return (
       <g>
-        {/* 16x16 朱砂红印章 */}
+        {/* 朱砂红印章 */}
         <rect
-          x={x + width / 2 - 8}
-          y={stampY - 16}
-          width={16}
-          height={16}
+          x={x + width / 2 - size / 2}
+          y={stampY - size}
+          width={size}
+          height={size}
           fill="#B22D1B"
           stroke="#8B1810"
           strokeWidth={1.5}
@@ -332,10 +345,10 @@ const createActionAdviceStampLabel = (dataPoints: (KLinePoint | InterpolatedKLin
 
         {/* 内部白色细边框 */}
         <rect
-          x={x + width / 2 - 7}
-          y={stampY - 15}
-          width={14}
-          height={14}
+          x={x + width / 2 - (size - 2) / 2}
+          y={stampY - size + 1}
+          width={size - 2}
+          height={size - 2}
           fill="none"
           stroke="#FFFFFF"
           strokeWidth={0.8}
@@ -346,9 +359,9 @@ const createActionAdviceStampLabel = (dataPoints: (KLinePoint | InterpolatedKLin
         {/* 白色反显篆刻汉字 */}
         <text
           x={x + width / 2}
-          y={stampY - 4}
+          y={stampY - size / 2 + fontSize / 2 - 1}
           fill="#FFFFFF"
-          fontSize={10}
+          fontSize={fontSize}
           fontWeight="bold"
           textAnchor="middle"
           fontFamily="KaiTi, serif"
@@ -484,46 +497,45 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
   }
 
   return (
-    <div className="w-full h-[600px] paper-texture p-2 md:p-6 rounded-xl border border-gray-200 shadow-sm relative">
-      <div className="mb-6 flex justify-between items-center px-2">
-        <h3 className="text-xl font-bold text-gray-800">{title || '人生流年大运K线图'}</h3>
-        <div className="flex gap-4 text-xs font-medium">
-          <span className="flex items-center text-red-900 bg-red-50 px-2 py-1 rounded">
-            <div className="w-2 h-2 bg-cinnabarred mr-2 rounded-full"></div> 吉运
+    <div className="w-full h-[400px] sm:h-[500px] md:h-[600px] paper-texture p-2 sm:p-4 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm relative">
+      <div className="mb-3 sm:mb-4 md:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 px-1 sm:px-2">
+        <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800">{title || '人生流年大运K线图'}</h3>
+        <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs font-medium">
+          <span className="flex items-center text-red-900 bg-red-50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-cinnabarred mr-1 sm:mr-2 rounded-full"></div> 吉运
           </span>
-          <span className="flex items-center text-indigo-900 bg-indigo-50 px-2 py-1 rounded">
-            <div className="w-2 h-2 bg-indigo mr-2 rounded-full"></div> 凶运
+          <span className="flex items-center text-indigo-900 bg-indigo-50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-indigo mr-1 sm:mr-2 rounded-full"></div> 凶运
           </span>
-          <span className="flex items-center text-indigo-700 bg-indigo-100 px-2 py-1 rounded">
-            <div className="w-5 h-0 border-t-2 border-amber-600 border-dashed mr-2"></div> 支撑/压力
+          <span className="flex items-center text-indigo-700 bg-indigo-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+            <div className="w-4 sm:w-5 h-0 border-t-2 border-amber-600 border-dashed mr-1 sm:mr-2"></div> 支撑/压力
           </span>
-          <span className="flex items-center text-indigo-700 bg-indigo-200 px-2 py-1 rounded">
-            <div className="w-2 h-2 bg-green-500 mr-2 rounded-full"></div> MK10
+          <span className="flex items-center text-indigo-700 bg-indigo-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 mr-1 sm:mr-2 rounded-full"></div> MK10
           </span>
-          
         </div>
       </div>
 
       <ResponsiveContainer width="100%" height="90%">
-        <ComposedChart data={transformedData} margin={{ top: 30, right: 10, left: 0, bottom: 20 }}>
+        <ComposedChart data={transformedData} margin={{ top: 20, right: 5, left: -10, bottom: 10 }}>
           {/* No CartesianGrid - removed for Chinese painting aesthetic */}
     <>
           <XAxis
             dataKey={xAxisConfig.dataKey}
-            tick={{fontSize: 10, fill: '#6b7280', fontFamily: 'KaiTi, serif'}}
+            tick={{fontSize: 8, fill: '#6b7280', fontFamily: 'KaiTi, serif'}}
             interval={xAxisConfig.interval}
             axisLine={{ stroke: '#D1CDC2', strokeWidth: 1 }}
             tickLine={false}
-            height={30}
+            height={25}
             tickFormatter={xAxisConfig.tickFormatter}
           />
 
           <YAxis
             domain={[0, 'auto']}
-            tick={{fontSize: 10, fill: '#6b7280'}}
+            tick={{fontSize: 8, fill: '#6b7280'}}
             axisLine={false}
             tickLine={false}
-            label={{ value: '运势分', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#9ca3af' }}
+            label={{ value: '运势分', angle: -90, position: 'insideLeft', fontSize: 8, fill: '#9ca3af' }}
           />
 
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#9ca3af', strokeWidth: 1, strokeDasharray: '4 4' }} />
@@ -541,7 +553,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
                 value={point.daYun}
                 position="top"
                 fill="#6366f1"
-                fontSize={10}
+                fontSize={8}
                 fontWeight="bold"
                 className="hidden md:block"
               />
@@ -559,7 +571,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
               value: 'S',
               position: 'insideLeft',
               fill: '#2F4F4F',
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: 'bold',
               offset: -8
             }}
@@ -576,7 +588,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
               value: 'R',
               position: 'insideRight',
               fill: '#B22D1B',
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: 'bold',
               offset: -8
             }}
@@ -595,7 +607,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
                 value: `财`,
                 position: 'insideLeft',
                 fill: '#C5A367',
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: 'bold',
                 fontFamily: 'KaiTi, serif'
               }}
@@ -615,7 +627,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
                 value: `印`,
                 position: 'insideRight',
                 fill: '#8B8680',
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: 'bold',
                 fontFamily: 'KaiTi, serif'
               }}
@@ -634,7 +646,7 @@ const LifeKLineChart: React.FC<LifeKLineChartProps> = ({ data, viewMode = 'year'
                 value: `今年 ${currentYear}`,
                 position: 'top',
                 fill: '#FFA500',
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: 'bold',
                 offset: 10
               }}

@@ -326,7 +326,7 @@ export default function ResultPage() {
               <Button
                 variant="outline"
                 onClick={handleExportJson}
-                className="flex items-center gap-2"
+                className="flex-1 flex items-center gap-2 min-w-24"
               >
                 <FileJson className="w-4 h-4" />
                 导出 JSON
@@ -334,7 +334,7 @@ export default function ResultPage() {
               <Button
                 variant="outline"
                 onClick={handleExportHtml}
-                className="flex items-center gap-2"
+                className="flex-1 flex items-center gap-2 min-w-24"
               >
                 <Download className="w-4 h-4" />
                 保存为 HTML
@@ -342,7 +342,7 @@ export default function ResultPage() {
               <Button
                 variant="secondary"
                 onClick={handlePrint}
-                className="flex items-center gap-2"
+                className="flex-1 flex items-center gap-2 min-w-24"
               >
                 <Printer className="w-4 h-4" />
                 打印/PDF
@@ -350,7 +350,7 @@ export default function ResultPage() {
               <Button
                 variant="primary"
                 onClick={handleReset}
-                className="flex items-center gap-2"
+                className="flex-1 flex items-center gap-2 min-w-24"
               >
                 <RotateCcw className="w-4 h-4" />
                 重新排盘
