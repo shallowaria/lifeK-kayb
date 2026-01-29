@@ -104,10 +104,10 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
           {/* 标题 */}
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#2c1810] mb-4 font-song tracking-widest flex items-center justify-center gap-6">
-              <span className="text-red-800 opacity-80 text-2xl">◈</span>
-              请输入您的出生信息
-              <span className="text-red-800 opacity-80 text-2xl">◈</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#2c1810] mb-4 font-song tracking-widest flex items-center justify-center gap-3 sm:gap-4 md:gap-6 whitespace-nowrap overflow-hidden px-2">
+              <span className="text-red-800 opacity-80 text-lg sm:text-xl md:text-2xl flex-shrink-0">◈</span>
+              <span className="truncate">请输入您的出生信息</span>
+              <span className="text-red-800 opacity-80 text-lg sm:text-xl md:text-2xl flex-shrink-0">◈</span>
             </h2>
           </div>
 
@@ -117,7 +117,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
             <div className="space-y-12">
               {/* 姓名 */}
               <div className="group">
-                <label className="block text-xl font-bold text-[#4a3b32] mb-4 font-song pl-2 border-l-4 border-[#b22222]">
+                <label className="block text-base sm:text-lg md:text-xl font-bold text-[#4a3b32] mb-4 font-song pl-2 border-l-4 border-[#b22222] whitespace-nowrap overflow-hidden text-ellipsis">
                   姓名 <span className="text-sm font-normal text-gray-500 align-middle ml-2">（可选）</span>
                 </label>
                 <div className="relative mt-2">
@@ -133,7 +133,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
               {/* 性别 */}
               <div>
-                <label className="block text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222]">
+                <label className="block text-base sm:text-lg md:text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222] whitespace-nowrap overflow-hidden text-ellipsis">
                   性别 <span className="text-[#b22222] align-top">*</span>
                 </label>
                 <div className="flex gap-8">
@@ -169,12 +169,12 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
               {/* 出生日期 - 重点修改区域 */}
               <div>
-                <label className="block text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222]">
+                <label className="block text-base sm:text-lg md:text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222] whitespace-nowrap overflow-hidden text-ellipsis">
                   出生日期 (公历) <span className="text-[#b22222] align-top">*</span>
                 </label>
-                
-                {/* 增加 w-full 确保外部容器本身也是满宽 */}
-                <div className="custom-date-input-wrapper w-full px-2">
+
+                {/* 移除 px-2 以在移动端获得更多空间 */}
+                <div className="custom-date-input-wrapper w-full">
                   <SegmentedDateInput
                     ref={dateInputRef}
                     value={birthDate}
@@ -188,7 +188,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
 
             {/* 右侧：时辰选择 */}
             <div>
-              <label className="block text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222]">
+              <label className="block text-base sm:text-lg md:text-xl font-bold text-[#4a3b32] mb-6 font-song pl-2 border-l-4 border-[#b22222] whitespace-nowrap overflow-hidden text-ellipsis">
                 出生时辰 <span className="text-[#b22222] align-top">*</span>
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 md:gap-5">

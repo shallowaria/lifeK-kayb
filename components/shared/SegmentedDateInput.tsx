@@ -293,8 +293,7 @@ const SegmentedDateInput = forwardRef<
         value={year}
         onChange={handleYearChange}
         onKeyDown={handleYearKeyDown}
-        placeholder="YYYY"
-        className="date-segment-input date-segment-year"
+        placeholder="年"
         aria-label="年份"
       />
 
@@ -309,8 +308,7 @@ const SegmentedDateInput = forwardRef<
           value={month}
           onChange={handleMonthChange}
           onKeyDown={handleMonthKeyDown}
-          placeholder="MM"
-          className="date-segment-input date-segment-month"
+          placeholder="月"
           aria-label="月份"
         />
         <button
@@ -348,8 +346,7 @@ const SegmentedDateInput = forwardRef<
           value={day}
           onChange={handleDayChange}
           onKeyDown={handleDayKeyDown}
-          placeholder="DD"
-          className="date-segment-input date-segment-day"
+          placeholder="日"
           aria-label="日期"
         />
         <button
