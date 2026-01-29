@@ -309,7 +309,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
             type="submit"
             disabled={!calculatedData || calculating}
             className={`
-                w-full md:w-1/2 py-5 text-2xl font-bold rounded-full shadow-xl transition-all duration-300 font-song tracking-[0.3em]
+                w-full md:w-1/2 py-5 text-base sm:text-xl md:text-2xl lg:text-3xl font-bold rounded-full shadow-xl transition-all duration-300 font-song tracking-[0.3em] text-nowrap
                 ${
                   calculatedData
                     ? "bg-[#8B3A3A] hover:bg-[#9e4242] text-[#F5F2E9] ring-4 ring-[#8B3A3A]/20"
