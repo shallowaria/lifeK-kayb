@@ -111,7 +111,7 @@ export default function BaziForm({ onSubmit, initialData }: BaziFormProps) {
             <span className="text-red-800 opacity-80 text-lg sm:text-xl md:text-2xl shrink-0">
               ◈
             </span>
-            <span className="text-sm sm:text-lg md:text-xl font-bold text-[#4a3b32] font-song whitespace-nowrap overflow-hidden text-ellipsis">
+            <span className="text-sm sm:text-lg md:text-xl font-bold text-[#4a3b32] font-song whitespace-nowrap">
               请输入您的出生信息
             </span>
             <span className="text-red-800 opacity-80 text-lg sm:text-xl md:text-2xl shrink-0">
