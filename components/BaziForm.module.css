@@ -31,7 +31,7 @@
   flex-direction: row !important;
   width: 100% !important;
   max-width: 100% !important;
-  gap: 1.5rem !important;
+  gap: 0.5rem !important;
   justify-content: center !important; /* 居中对齐，而不是 space-between */
   align-items: center !important;
 }
@@ -39,7 +39,7 @@
 /* 移动端响应式调整 - 防止溢出 */
 @media (max-width: 640px) {
   :global(.custom-date-input-wrapper > div) {
-    gap: 0.5rem !important; /* 移动端进一步减小间距 */
+    gap: 0.2rem !important; /* 移动端进一步减小间距 */
   }
 }
 
