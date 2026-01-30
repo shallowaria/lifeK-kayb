@@ -105,6 +105,22 @@ export default function ResultPage() {
     }
   };
 
+  // 计算 Y 轴范围（用于日视图和月视图的提示信息）
+  const getYAxisRange = () => {
+    if (viewMode === "year" || chartData.length === 0) return null;
+
+    const allValues = chartData.flatMap((d) => [d.low, d.high]);
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+    const range = maxValue - minValue;
+    const padding = range * 0.2;
+
+    const yMin = Math.max(0, Math.floor(minValue - padding));
+    const yMax = Math.ceil(maxValue + padding);
+
+    return { min: yMin, max: yMax };
+  };
+
   const handleExportJson = () => {
     if (!result) return;
     exportToJson(result, `${userName}_life_kline`);
@@ -322,7 +338,7 @@ export default function ResultPage() {
               </h1>
               <p className="text-gray-600">基于八字命理的运势可视化分析</p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Button
                 variant="outline"
                 onClick={handleExportJson}
@@ -398,23 +414,31 @@ export default function ResultPage() {
             supportPressureLevels={result?.analysis.supportPressureLevels}
           />
           {viewMode !== "year" && (
-            <div className="mt-4 text-center text-sm text-gray-500">
+            <div className="mt-6 sm:mt-4 text-center text-sm text-gray-500 space-y-1">
               <p>📊 数据基于年度运势插值计算，仅供参考</p>
+              {(() => {
+                const yRange = getYAxisRange();
+                return yRange ? (
+                  <p className="text-md text-amber-400">
+                    🤔 Y轴已动态调整至
+                    <span className="text-cinnabarred font-bold mx-2">
+                      {yRange.min}-{yRange.max}
+                    </span>
+                    范围以更好展示运势范围
+                  </p>
+                ) : null;
+              })()}
             </div>
           )}
         </div>
 
-        {/* 命理分析面板（仅在年视图显示） */}
-        {viewMode === "year" && (
-          <>
-            <AnalysisResult analysis={result.analysis} />
+        {/* 命理分析面板 */}
+        <AnalysisResult analysis={result.analysis} />
 
-            {/* 行动指南面板 */}
-            <div className="mt-8">
-              <ActionAdvicePanel data={chartData} viewMode={viewMode} />
-            </div>
-          </>
-        )}
+        {/* 行动指南面板 */}
+        <div className="mt-8">
+          <ActionAdvicePanel data={chartData} viewMode={viewMode} />
+        </div>
 
         {/* 免责声明 */}
         <div className="mt-12 text-center text-sm text-gray-500 no-print">
