@@ -18,7 +18,7 @@ export default function ViewSwitcher({
     <div className="flex justify-between sm:gap-2 bg-xuanpaper p-1 rounded-lg shadow-sm text-sm">
       <button
         onClick={() => onViewChange("year")}
-        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+        className={`flex items-center sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition-colors whitespace-nowrap ${
           currentView === "year"
             ? "bg-white text-red-600 font-semibold shadow-sm"
             : "text-gray-600 hover:text-gray-900"
@@ -29,7 +29,7 @@ export default function ViewSwitcher({
       </button>
       <button
         onClick={() => onViewChange("mouth")}
-        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+        className={`flex items-center sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition-colors whitespace-nowrap ${
           currentView === "mouth"
             ? "bg-white text-red-600 font-semibold shadow-sm"
             : "text-gray-600 hover:text-gray-900"
@@ -40,7 +40,7 @@ export default function ViewSwitcher({
       </button>
       <button
         onClick={() => onViewChange("day")}
-        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+        className={`flex items-center sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition-colors whitespace-nowrap ${
           currentView === "day"
             ? "bg-white text-red-600 font-semibold shadow-sm"
             : "text-gray-600 hover:text-gray-900"

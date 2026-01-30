@@ -326,41 +326,41 @@ export default function ResultPage() {
               <Button
                 variant="outline"
                 onClick={handleExportJson}
-                className="flex-1 flex items-center gap-2 min-w-24"
+                className="flex-1 flex items-center gap-2 min-w-24 whitespace-nowrap"
               >
-                <FileJson className="w-4 h-4" />
-                导出 JSON
+                <FileJson className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base">导出 JSON</span>
               </Button>
               <Button
                 variant="outline"
                 onClick={handleExportHtml}
-                className="flex-1 flex items-center gap-2 min-w-24"
+                className="flex-1 flex items-center gap-2 min-w-24 whitespace-nowrap"
               >
-                <Download className="w-4 h-4" />
-                保存为 HTML
+                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base">存为 HTML</span>
               </Button>
               <Button
                 variant="secondary"
                 onClick={handlePrint}
-                className="flex-1 flex items-center gap-2 min-w-24"
+                className="flex-1 flex items-center gap-2 min-w-24 whitespace-nowrap"
               >
-                <Printer className="w-4 h-4" />
-                打印/PDF
+                <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base">打印/PDF</span>
               </Button>
               <Button
                 variant="primary"
                 onClick={handleReset}
-                className="flex-1 flex items-center gap-2 min-w-24"
+                className="flex-1 flex items-center gap-2 min-w-24 whitespace-nowrap"
               >
-                <RotateCcw className="w-4 h-4" />
-                重新排盘
+                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base">重新排盘</span>
               </Button>
             </div>
           </div>
         </div>
 
         {/* 视图切换器 */}
-        <div className="bg-xuanpaper rounded-2xl shadow-lg p-6 mb-8">
+        <div className="bg-xuanpaper rounded-2xl shadow-lg sm:p-6 sm:mb-8 p-3 mb-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">
@@ -384,7 +384,7 @@ export default function ResultPage() {
           </div>
         </div>
 
-        {/* 新增：风险警告横幅 */}
+        {/* 风险警告横幅 */}
         {result && chartData.length > 0 && (
           <RiskWarningBanner data={chartData} viewMode={viewMode} />
         )}
