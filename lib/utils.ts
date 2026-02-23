@@ -33,7 +33,7 @@ export function cleanMarkdown(text: string): string {
 }
 
 /**
- * 生成用户提示词
+ * 生成用户提示词（仅用户信息部分，系统指令单独发送）
  */
 export function generateUserPrompt(userInput: UserInput): string {
   const { text: direction } = getDaYunDirection(
@@ -43,11 +43,7 @@ export function generateUserPrompt(userInput: UserInput): string {
 
   const genderText = userInput.gender === 'Male' ? '乾造（男）' : '坤造（女）';
 
-  return `${BAZI_SYSTEM_INSTRUCTION}
-
----
-
-**用户八字信息:**
+  return `**用户八字信息:**
 - 性别: ${genderText}
 - 出生年份: ${userInput.birthYear}
 - 四柱: ${userInput.yearPillar}年 ${userInput.monthPillar}月 ${userInput.dayPillar}日 ${userInput.hourPillar}时
@@ -55,6 +51,13 @@ export function generateUserPrompt(userInput: UserInput): string {
 - 大运方向: ${direction}
 
 请严格按照JSON格式输出，不要添加任何额外的文字说明。`;
+}
+
+/**
+ * 获取系统指令
+ */
+export function getSystemInstruction(): string {
+  return BAZI_SYSTEM_INSTRUCTION;
 }
 
 /**

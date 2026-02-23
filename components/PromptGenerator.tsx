@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { UserInput } from '@/types';
-import { generateUserPrompt } from '@/lib/utils';
+import { generateUserPrompt, getSystemInstruction } from '@/lib/utils';
 import Button from './shared/Button';
 import { Copy, Check } from 'lucide-react';
 
@@ -18,7 +18,7 @@ export default function PromptGenerator({
   onBack,
 }: PromptGeneratorProps) {
   const [copied, setCopied] = useState(false);
-  const prompt = generateUserPrompt(userInput);
+  const prompt = getSystemInstruction() + '\n\n---\n\n' + generateUserPrompt(userInput);
 
   const handleCopy = async () => {
     try {
